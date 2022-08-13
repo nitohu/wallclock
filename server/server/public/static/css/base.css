@@ -1,6 +1,8 @@
-body {
-    background-color: #130f40;
-    color: #dfe6e9;
+:root {
+    --bs-body-bg: #130f40;
+    --bs-body-color: #dfe6e9;
+    --bs-link-color: #a5b1c2;
+    --bs-link-hover-color: #778ca3;
 }
 
 .form-control {
@@ -10,4 +12,15 @@ body {
 
 .form-control:focus {
     border: 1px solid #30336b !important;
+}
+
+.btn-link {
+    text-decoration: none;
+}
+
+footer {
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    padding: 1em 0;
 }
