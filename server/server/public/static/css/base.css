@@ -1,0 +1,13 @@
+body {
+    background-color: #130f40;
+    color: #dfe6e9;
+}
+
+.form-control {
+    background-color: #273c75 !important;
+    border: 1px solid #40739e !important;
+}
+
+.form-control:focus {
+    border: 1px solid #30336b !important;
+}
