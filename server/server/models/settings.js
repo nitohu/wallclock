@@ -15,10 +15,9 @@ class Settings {
     constructor() {}
     // Methods
     async authenticate(passwd) {
-        const res = await db.query("SELECT * FROM settings ORDER BY id DESC LIMIT 1")
-        if (res.rowCount == 0) throw new Error("No record in settings found.")
+        const r = await db.queryOne("SELECT * FROM settings ORDER BY id DESC")
+        if (!r) throw new Error("No record in settings found.")
 
-        const r = res.rows[0]
         // Authenticate
         const isMatch = await bcrypt.compare(String(passwd), r.passwd)
         if (!isMatch) throw new Error("Error while authenticating.")

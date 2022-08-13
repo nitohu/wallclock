@@ -17,16 +17,23 @@ pool.connect().then(() => {
     process.exit(1)
 })
 
-// Do we always open a new pool (& probably not closing it) when importing this file?
-// From reading the logs it does not seem to do that
+const query = async (text, params) => {
+    const s = Date.now()
+    const r = await pool.query(text, params)
+    const d = Date.now() - s
+    logger.info(`query "${text}" executed in ${d}ms (Records affected: ${ r.rowCount })`)
+    return r
+}
+const queryOne = async (text, params) => {
+    logger.info(text)
+    if (!text.toLowerCase().includes("limit")) text += " LIMIT 1"
+    logger.info(text)
+    const r = await query(text, params)
+    return r.rowCount < 1 ? null : r.rows[0]
+} 
+
 module.exports = {
     // pool,
-    query: async (text, params, cb) => {
-        const s = Date.now()
-        const r = await pool.query(text, params)
-        const d = Date.now() - s
-        logger.info(`query "${text}" executed in ${d}ms (Records affected: ${ r.rowCount })`)
-        return r
-    }
-    // TODO: Implement queryOne function
+    query,
+    queryOne
 }
