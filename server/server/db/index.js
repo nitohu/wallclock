@@ -1,5 +1,6 @@
 const { Pool } = require("pg")
 const config = require("../config")
+const logger = require("../logger")
 
 // Set up & connect to database, stop program if it fails
 const pool = new Pool({
@@ -10,9 +11,9 @@ const pool = new Pool({
     database: config.dbDatabase
 })
 pool.connect().then(() => {
-    console.log(`Successfully connected to database ${config.dbDatabase} on ${config.dbHost}`)
+    logger.info(`Successfully connected to database ${config.dbDatabase} on ${config.dbHost}`)
 }).catch(err => {
-    console.error(`There was an error while connecting to the database: ${err}`)
+    logger.error(`There was an error while connecting to the database: ${err}`)
     process.exit(1)
 })
 
@@ -24,7 +25,8 @@ module.exports = {
         const s = Date.now()
         const r = await pool.query(text, params)
         const d = Date.now() - s
-        console.log(`[INFO] query "${text}" executed in ${d}ms (Records affected: ${ r.rowCount })`)
+        logger.info(`query "${text}" executed in ${d}ms (Records affected: ${ r.rowCount })`)
         return r
     }
+    // TODO: Implement queryOne function
 }
