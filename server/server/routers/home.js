@@ -1,27 +1,27 @@
 const express = require("express")
-// const auth = require("../middleware/auth")
+const auth = require("../middleware/auth")
 const Settings = require("../models/settings")
-const Authentication = require("../models/authentication")
+const Device = require("../models/device")
 const logger = require("../logger")
 
 const router = express.Router()
 
-router.get("/", async (req, res) => {
-    // TODO: If user is authenticated, redirect to dashboard (or build that logic in the template)
-    if (req.session.authenticated && req.session.settings) {
-        return res.render("home", {
-            settings: req.session.settings,
-            title: "Welcome " + req.session.settings.username
-        })
+router.get("/", auth, async (req, res) => {
+    const devices = await Device.GetAll()
+    logger.info(`Found ${devices.length} devices`)
+    for (let i = 0; i < devices.length; i++) {
+        logger.info(`Device #${i+1}: ${devices[i].name}, ${devices[i].ip} (${devices[i].getID()})`)
     }
-    // User is not authenticated
-    return res.render("login", {
-        title: "Welcome",
-        error: false
+
+    return res.render("home", {
+        settings: req.session.settings,
+        title: "Welcome " + req.session.settings.username,
+        devices
     })
 })
 
 // Handle login
+// NOTE: Probably need to move it to custom /login route
 router.post("/", async (req, res) => {
     let settings;
     try {
@@ -45,9 +45,7 @@ router.post("/", async (req, res) => {
     })
 })
 
-router.get("/logout", async (req, res) => {
-    if (!req.session) return res.redirect("/")
-
+router.get("/logout", auth, async (req, res) => {
     req.session.destroy((err) => {
         if (err) logger.warn(`Error while destroying the session: ${err}`)
     })
