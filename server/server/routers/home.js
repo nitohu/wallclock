@@ -39,9 +39,11 @@ router.post("/", async (req, res) => {
     // Authentication successful
     req.session.authenticated = true
     req.session.settings = settings
+    const devices = await Device.GetAll()
     return res.render("home", {
         settings,
-        title: "Welcome " + settings.username
+        title: "Welcome " + settings.username,
+        devices
     })
 })
 

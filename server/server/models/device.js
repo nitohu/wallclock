@@ -57,7 +57,6 @@ class Device {
         if (r.rowCount === 0)
             throw new Error("No row was affected.")
         
-        console.log(r)
     }
 
     // FindByID
@@ -78,6 +77,12 @@ class Device {
         this.#createDate = r.create_date
         this.#writeDate = r.write_date
         this.#lastConn = r.last_conn
+    }
+
+    static async FindByID(id) {
+        let d = new Device()
+        await d.findByID(id)
+        return d
     }
 
     // Gets all devices from database and returns them

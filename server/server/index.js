@@ -1,11 +1,10 @@
 const express = require("express")
 const session = require("express-session")
-const ejs = require("ejs")
 const path = require("path")
 const config = require("./config")
 const logger = require("./logger")
-const db = require("./db")
 const home = require("./routers/home")
+const devices = require("./routers/device")
 
 // Set up server/app
 const app = express()
@@ -29,5 +28,6 @@ app.use((req, res, next) => {
 
 // Set up routers
 app.use("/", home)
+app.use("/devices", devices)
 
 app.listen(8000, null)

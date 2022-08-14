@@ -37,7 +37,7 @@
             <% devices.forEach(device => { %>
                 <tr>
                     <td><%= device.getID() %></td>
-                    <td><%= device.name %></td>
+                    <td><a href="/devices?id=<%= device.getID() %>" class="btn btn-link"><%= device.name %></a></td>
                     <td><%= device.ip %></td>
                     <td><%= device.token %></td>
                     <td><%= device.getLastConn() %></td>
