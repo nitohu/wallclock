@@ -18,6 +18,20 @@
     text-decoration: none;
 }
 
+.table-dark {
+    --bs-table-color: #dfe6e9;
+    --bs-table-bg: #303952;
+    --bs-table-striped-bg: #222f3e;
+    --bs-table-striped-color: #dfe6e9;
+    --bs-table-active-bg: #373b3e;
+    --bs-table-hover-bg: #485460;
+
+    border: 1px solid #373b3e;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 5px;
+}
+
 footer {
     position: absolute;
     bottom: 0px;
