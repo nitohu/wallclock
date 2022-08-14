@@ -25,9 +25,7 @@ const query = async (text, params) => {
     return r
 }
 const queryOne = async (text, params) => {
-    logger.info(text)
     if (!text.toLowerCase().includes("limit")) text += " LIMIT 1"
-    logger.info(text)
     const r = await query(text, params)
     return r.rowCount < 1 ? null : r.rows[0]
 } 
