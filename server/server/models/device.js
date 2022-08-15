@@ -22,8 +22,11 @@ class Device {
     // Public Methods
     getID() { return this.#id }
     getCreateDate() { return this.#createDate }
+    getCreateDateStr() { return this.#createDate.toLocaleString() }
     getWriteDate() { return this.#writeDate }
+    getWriteDateStr() { return this.#writeDate.toLocaleString() }
     getLastConn() { return this.#lastConn }
+    getLastConnStr() { return (this.#lastConn) ? this.#lastConn.toLocaleString() : undefined }
 
     // Create database record
     async create() {
@@ -57,6 +60,20 @@ class Device {
         if (r.rowCount === 0)
             throw new Error("No row was affected.")
         
+    }
+
+    // Delete from database
+    async delete() {
+        if (this.#id < 1)
+            throw new Error("Device has no id, cannot delete from database.")
+        const q = "DELETE FROM device WHERE id=$1 RETURNING *"
+        let r = await db.query(q, [this.#id])
+        if (!r)
+            throw new Error("An unexpected error occured")
+        if (r.rowCount == 0)
+            throw new Error("No row was affected.")
+        
+        return r.rows[0]
     }
 
     // FindByID

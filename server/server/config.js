@@ -8,7 +8,8 @@ const config = {
 
     // Website settings
     sessionSecret: "supersecret",
-    ssl: false
+    ssl: false,
+    timezone: "Europe/Berlin"
 }
 
 module.exports = config

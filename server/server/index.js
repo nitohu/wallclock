@@ -7,6 +7,7 @@ const home = require("./routers/home")
 const devices = require("./routers/device")
 
 // Set up server/app
+process.env.TZ = config.timezone
 const app = express()
 app.set("views", path.join(__dirname, "templates"))
 app.set("view engine", "ejs")

@@ -8,10 +8,6 @@ const router = express.Router()
 
 router.get("/", auth, async (req, res) => {
     const devices = await Device.GetAll()
-    logger.info(`Found ${devices.length} devices`)
-    for (let i = 0; i < devices.length; i++) {
-        logger.info(`Device #${i+1}: ${devices[i].name}, ${devices[i].ip} (${devices[i].getID()})`)
-    }
 
     return res.render("home", {
         settings: req.session.settings,

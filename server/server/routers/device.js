@@ -60,4 +60,21 @@ router.post("/", auth, async (req, res) => {
     return res.redirect("/")
 })
 
+router.get("/delete", auth, async (req, res) => {
+    try {
+        // TODO: Could be enhanced by writing static Delete function which executes only 1 query
+        const d = await Device.FindByID(req.query.id)
+        const r = await d.delete()
+        logger.info(`Successfully deleted device "${r.name}" with ID ${r.id}`)
+        
+        return res.redirect("/")
+    } catch (err) {
+        return res.render("delete_device_err", {
+            settings: req.session.settings,
+            // err: "Please enter an ID to delete a device."
+            err
+        })
+    }
+})
+
 module.exports = router
