@@ -17,8 +17,19 @@ router.get("/", auth, async (req, res) => {
 })
 
 // Handle login
-// NOTE: Probably need to move it to custom /login route
-router.post("/", async (req, res) => {
+router.get("/login", async (req, res) => {
+    // Already logged in
+    if (req.session && req.session.authenticated && req.session.settings) {
+        return res.redirect("/")
+    }
+
+    return res.render("login", {
+        title: "Welcome",
+        error: false
+    })
+})
+
+router.post("/login", async (req, res) => {
     let settings;
     try {
         settings = await Settings.Authenticate(req.body.token)
@@ -35,19 +46,15 @@ router.post("/", async (req, res) => {
     // Authentication successful
     req.session.authenticated = true
     req.session.settings = settings
-    const devices = await Device.GetAll()
-    return res.render("home", {
-        settings,
-        title: "Welcome " + settings.username,
-        devices
-    })
+
+    return res.redirect("/")
 })
 
 router.get("/logout", auth, async (req, res) => {
     req.session.destroy((err) => {
         if (err) logger.warn(`Error while destroying the session: ${err}`)
     })
-    return res.redirect("/")
+    return res.redirect("/login")
 })
 
 module.exports = router

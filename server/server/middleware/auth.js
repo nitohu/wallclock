@@ -8,11 +8,7 @@ const auth = async (req, res, next) => {
     }
 
     // User is not authenticated
-    // NOTE: might be changed to redirect to /login when route is existing
-    return res.render("login", {
-        title: "Welcome",
-        error: false
-    })
+    return res.redirect("/login")
 }
 
 module.exports = auth
