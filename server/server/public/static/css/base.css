@@ -39,3 +39,11 @@ footer {
     padding: 1em 0;
 }
 
+/* Overwrite bootstraps class with min-width */
+.d-md-flex {
+    display: flex!important;
+}
+
+.justify-content-md-end {
+    justify-content: flex-end!important;
+}
