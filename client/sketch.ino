@@ -9,7 +9,8 @@ CRGB leds[LED_COUNT];
 // Color
 unsigned short r = 0, g = 0, b = 0;
 // Mode (will be necessary for some effects)
-int m = 0;
+short m = 0;
+short is_on = 1;
 // Brightness (0 -> 1)
 float brightness = 0.3f;
 // Delay in ms (will be configurable)
@@ -22,6 +23,8 @@ void updateLeds();
 
 // Effects
 void fade_effect();
+void turn_off();
+void turn_on();
 void white();
 
 void setup() {
@@ -62,9 +65,12 @@ void loop() {
 
 void updateLeds() {
     for (int i = 0; i < LED_COUNT; i++) {
-        int rb = r*brightness;
-        int gb = g*brightness;
-        int bb = b*brightness;
+        int rb = 0, gb = 0, bb = 0;
+        if (is_on) {
+            rb = r*brightness;
+            gb = g*brightness;
+            bb = b*brightness;
+        }
         leds[i] = CRGB(rb, gb, bb);
     }
     FastLED.show();
@@ -97,6 +103,14 @@ void fade_effect() {
             r = 0;
         }
     }
+}
+
+void turn_off() {
+    is_on = 0;
+}
+
+void turn_on() {
+    is_on = 1;
 }
 
 void white() {
