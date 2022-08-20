@@ -9,10 +9,13 @@ CRGB leds[LED_COUNT];
 // Color
 unsigned short r = 0, g = 0, b = 0;
 // Mode (will be necessary for some effects)
-short m = 0;
+unsigned short m = 0;
+// Effect Brightness (will be necessary for pulse effect)
+float eff_b = 0.0f;
 short is_on = 1;
 // Brightness (0 -> 1)
 float brightness = 0.3f;
+short offset = 0;
 // Delay in ms (will be configurable)
 unsigned long del = 10;
 // Wifi stuff
@@ -20,11 +23,14 @@ WiFiClient client;
 int wifiStatus = WL_IDLE_STATUS;
 
 void updateLeds();
+void turn_off();
+void turn_on();
 
 // Effects
 void fade_effect();
-void turn_off();
-void turn_on();
+void pulse();
+void rainbow(bool rotate);
+void static_color(short cr, short cg, short cb);
 void white();
 
 void setup() {
@@ -56,13 +62,14 @@ void setup() {
 
 void loop() {
     /* Connection success */
-    // Set colors
-    fade_effect();
-    // Update LED
-    updateLeds();
+    // Set colors & update LEDs
+    // rainbow(true);
+    // static_color(192, 57, 43);
+    pulse(0, 255, 0);
     delay(del);
 }
 
+// Helper function for static effects
 void updateLeds() {
     for (int i = 0; i < LED_COUNT; i++) {
         int rb = 0, gb = 0, bb = 0;
@@ -76,8 +83,20 @@ void updateLeds() {
     FastLED.show();
 }
 
+void turn_off() {
+    is_on = 0;
+}
+
+void turn_on() {
+    is_on = 1;
+}
+
+/**
+ * Effects
+ */
+
 void fade_effect() {
-    if (m < 0 || m > 2) m = 0;
+    if (m > 2) m = 0;
     if (m == 0) {
         r++;
         if (b > 0) b--;
@@ -103,18 +122,79 @@ void fade_effect() {
             r = 0;
         }
     }
+
+    updateLeds();
 }
 
-void turn_off() {
-    is_on = 0;
+void pulse(short cr, short cg, short cb) {
+    if (m > 1) m = 0;
+    // LED gets brighter
+    if (m == 0) {
+        eff_b += 0.01f;
+        if (eff_b >= 0.99f) {
+            m = 1;
+            delay(100);
+        }
+    }
+    // LED gets darker
+    else {
+        eff_b -= 0.01f;
+        if (eff_b <= 0.01f) {
+            m = 0;
+            delay(100);
+        }
+    }
+    r = cr * eff_b;
+    g = cg * eff_b;
+    b = cb * eff_b;
+    updateLeds();
 }
 
-void turn_on() {
-    is_on = 1;
+void rainbow(bool rotate) {
+    if (!is_on) {
+        updateLeds();
+        return;
+    }
+    short factor = 255 / (LED_COUNT / 3);
+    // If LED_COUNT is e.g. 120 factor will be 6, if r is set to 255 it'll never go fully down to zero (6 * 40 = 240)
+    r = factor * ( LED_COUNT / 3 );
+    g = 0;
+    b = 0;
+    for (int i = 0; i < LED_COUNT; i++) {
+        // First third
+        if (i < (LED_COUNT/3)) {
+            r -= factor;
+            g += factor;
+        } else if (i < (LED_COUNT/3)*2) {
+            g -= factor;
+            b += factor;
+        } else {
+            b -= factor;
+            r += factor;
+        }
+        if (i+offset < LED_COUNT)
+            leds[i+offset] = CRGB(r*brightness, g*brightness, b*brightness);
+        else
+            leds[i+offset-LED_COUNT] = CRGB(r*brightness, g*brightness, b*brightness);
+    }
+    if (rotate) offset++;
+    if (offset >= LED_COUNT) offset = 0;
+    FastLED.show();
+}
+
+void static_color(short cr, short cg, short cb) {
+    // FIXME: Colors are not represented properly (maybe need to switch to HSV)
+    r = cr;
+    g = cb;
+    b = cb;
+
+    updateLeds();
 }
 
 void white() {
     r = 255;
     g = 255;
     b = 255;
+
+    updateLeds();
 }
