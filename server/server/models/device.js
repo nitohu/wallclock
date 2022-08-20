@@ -1,4 +1,6 @@
+const jwt = require("jsonwebtoken")
 const db = require("../db")
+const config = require("../config")
 const logger = require("../logger")
 
 class Device {
@@ -7,12 +9,11 @@ class Device {
     #createDate = null
     #writeDate = null
     #lastConn = null
+    #token = ""
     // Public fields
     name = ""
     ip = ""
     active = true
-    // TODO: Implement tokens properly, currently only placeholder
-    token = ""
 
     constructor(name, ip) {
         if (name !== undefined) this.name = name
@@ -27,6 +28,7 @@ class Device {
     getWriteDateStr() { return this.#writeDate.toLocaleString() }
     getLastConn() { return this.#lastConn }
     getLastConnStr() { return (this.#lastConn) ? this.#lastConn.toLocaleString() : undefined }
+    getToken() { return this.#token }
 
     // Create database record
     async create() {
@@ -94,6 +96,12 @@ class Device {
         this.#createDate = r.create_date
         this.#writeDate = r.write_date
         this.#lastConn = r.last_conn
+    }
+    
+    generateToken() {
+        this.#token = jwt.sign({ id: this.#id.toString() }, config.apiSecret)
+
+        return this.#token
     }
 
     static async FindByID(id) {

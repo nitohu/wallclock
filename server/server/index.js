@@ -5,6 +5,7 @@ const config = require("./config")
 const logger = require("./logger")
 const home = require("./routers/home")
 const devices = require("./routers/device")
+const api = require("./routers/api")
 
 // Set up server/app
 process.env.TZ = config.timezone
@@ -30,5 +31,6 @@ app.use((req, res, next) => {
 // Set up routers
 app.use("/", home)
 app.use("/devices", devices)
+app.use("/api", api)
 
 app.listen(8000, null)
