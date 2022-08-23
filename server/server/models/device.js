@@ -3,6 +3,16 @@ const db = require("../db")
 const config = require("../config")
 const logger = require("../logger")
 
+const validModes = [
+    "gtime",
+    "stime",
+    "rainbow",
+    "static",
+    "pulse",
+    "fade",
+    "white"
+]
+
 class Device {
     // Private fields
     #id = 0
@@ -10,6 +20,8 @@ class Device {
     #writeDate = null
     #lastConn = null
     #token = ""
+    #mode = ""
+    #color = ""
     // Public fields
     name = ""
     ip = ""
@@ -29,6 +41,8 @@ class Device {
     getLastConn() { return this.#lastConn }
     getLastConnStr() { return (this.#lastConn) ? this.#lastConn.toLocaleString() : undefined }
     getToken() { return this.#token }
+    getMode() { return this.#mode }
+    getColor() { return this.#color }
 
     // Create database record
     async create() {
@@ -102,6 +116,20 @@ class Device {
         this.#token = jwt.sign({ id: this.#id.toString() }, config.apiSecret)
 
         return this.#token
+    }
+
+    async updateMode(mode, color) {
+        if (this.#id < 1) throw new Error("Device has no id, cannot write to database.")
+        if (!validModes.includes(mode)) throw new Error("Please provide a valid mode.")
+
+        // NOTE: Security vuln. ; color isn't checked
+        this.#mode = mode
+        this.#color = color
+
+        const q = "UPDATE device SET mode=$2, color=$3 WHERE id=$1 RETURNING id"
+        let r = await db.query(q, [this.#id, this.#mode, this.#color])
+        if (!r) throw new Error("Something bad happened.")
+        if (r.rowCount === 0) throw new Error("No row was affected.")
     }
 
     static async FindByID(id) {

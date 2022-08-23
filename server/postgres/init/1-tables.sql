@@ -18,7 +18,9 @@ CREATE TABLE device (
     -- Last time a connection with device was established
     last_conn timestamp,
     create_date timestamp,
-    write_date timestamp
+    write_date timestamp,
+    mode text,
+    color text
 );
 
 COMMIT;

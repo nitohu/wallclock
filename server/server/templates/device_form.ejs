@@ -64,7 +64,27 @@
         <% } %>
         <input type="reset" class="btn btn-dark" value="Reset" />  
     </form>
+    
+    <hr />
+    <!-- Toggle modes of clock (no need to always click on save) -->
+    <div>
+        <h2>Current Mode</h2>
+    
+        <!-- TODO: Improve ; this is just a temporary solution -->
+        <select id="currentModeSelector" name="cmode" class="form-control">
+            <option value="stime">Simple Time</option>
+            <option value="gtime">Gradient Time</option>
+            <option value="rainbow">Rainbow</option>
+            <option value="static" class="configurable">Static Color</option>
+            <option value="pulse" class="configurable">Pulse</option>
+            <option value="fade" class="configurable">Fade</option>
+            <option value="white" class="configurable">White</option>
+        </select>
+        <input type="color" name="currentColor" id="currentColor" class="form-control" style="visibility: hidden;" />
+        <button class="btn btn-secondary btn-sm" id="updateMode">Update Mode</button>
+    </div>
 </div>
+
 
 <footer>
     <hr />
