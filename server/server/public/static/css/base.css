@@ -1,0 +1,49 @@
+:root {
+    --bs-body-bg: #130f40;
+    --bs-body-color: #dfe6e9;
+    --bs-link-color: #a5b1c2;
+    --bs-link-hover-color: #778ca3;
+}
+
+.form-control {
+    background-color: #273c75 !important;
+    border: 1px solid #40739e !important;
+}
+
+.form-control:focus {
+    border: 1px solid #30336b !important;
+}
+
+.btn-link {
+    text-decoration: none;
+}
+
+.table-dark {
+    --bs-table-color: #dfe6e9;
+    --bs-table-bg: #303952;
+    --bs-table-striped-bg: #222f3e;
+    --bs-table-striped-color: #dfe6e9;
+    --bs-table-active-bg: #373b3e;
+    --bs-table-hover-bg: #485460;
+
+    border: 1px solid #373b3e;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 5px;
+}
+
+footer {
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    padding: 1em 0;
+}
+
+/* Overwrite bootstraps class with min-width */
+.d-md-flex {
+    display: flex!important;
+}
+
+.justify-content-md-end {
+    justify-content: flex-end!important;
+}
