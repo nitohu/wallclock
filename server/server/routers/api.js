@@ -46,4 +46,28 @@ router.get("/currentTime", async (req, res) => {
     })
 })
 
+router.get("/currentMode", async (req, res) => {
+    let device = undefined
+    try {
+        device = await Device.FindByToken(req.body.token)
+    } catch (e) {
+        return res.status(404).send({error: `Device with token ${req.body.token} not found.`})
+    }
+
+    if (!device.active) return res.status(403).send({error: "Device is not active."})
+
+    device.updateLastConn()
+    try {
+        await device.write()
+    } catch (e) {
+        logger.warn(`Error while writing device ${device.name} to database: ${e}`)
+    }
+
+    const r = {
+        mode: device.getMode(),
+        color: device.getColor()
+    }
+    return res.send(r)
+})
+
 module.exports = router

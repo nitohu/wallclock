@@ -10,7 +10,8 @@ const validModes = [
     "static",
     "pulse",
     "fade",
-    "white"
+    "white",
+    "off"
 ]
 
 class Device {
@@ -43,6 +44,10 @@ class Device {
     getToken() { return this.#token }
     getMode() { return this.#mode }
     getColor() { return this.#color }
+
+    updateLastConn() {
+        this.#lastConn = new Date()
+    }
 
     // Create database record
     async create() {
@@ -110,6 +115,30 @@ class Device {
         this.#createDate = r.create_date
         this.#writeDate = r.write_date
         this.#lastConn = r.last_conn
+        this.#mode = r.mode
+        this.#color = r.color
+    }
+
+    async findByToken(token) {
+        if (token === undefined || String(token).concat() === "")
+            throw new Error("Please enter a valid token.")
+        
+        // NOTE: SQL Injection possible? ; depends on db.query function
+        let r = await db.query("SELECT * FROM device WHERE token=$1", [token])
+        if (!r || r.rowCount === 0)
+            throw new Error(`No device with ${token} found.`)
+        
+        r = r.rows[0]
+        this.#id = r.id
+        this.name = r.name
+        this.ip = r.ip
+        this.active = r.active
+        this.token = r.token
+        this.#createDate = r.create_date
+        this.#writeDate = r.write_date
+        this.#lastConn = r.last_conn
+        this.#mode = r.mode
+        this.#color = r.color
     }
     
     generateToken() {
@@ -122,7 +151,7 @@ class Device {
         if (this.#id < 1) throw new Error("Device has no id, cannot write to database.")
         if (!validModes.includes(mode)) throw new Error("Please provide a valid mode.")
 
-        // NOTE: Security vuln. ; color isn't checked
+        // FIXME: Security vuln. ; color isn't checked ; SQL Injection possible
         this.#mode = mode
         this.#color = color
 
@@ -135,6 +164,12 @@ class Device {
     static async FindByID(id) {
         let d = new Device()
         await d.findByID(id)
+        return d
+    }
+
+    static async FindByToken(token) {
+        let d = new Device()
+        await d.findByToken(token)
         return d
     }
 
@@ -152,6 +187,8 @@ class Device {
             d.#createDate = r.rows[i].create_date
             d.#writeDate = r.rows[i].write_date
             d.#lastConn = r.rows[i].last_conn
+            d.#mode = r.rows[i].mode
+            d.#color = r.rows[i].color
             
             devices.push(d)
         }
