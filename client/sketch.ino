@@ -21,6 +21,7 @@ unsigned long del = 10;
 // Wifi stuff
 WiFiClient client;
 int wifiStatus = WL_IDLE_STATUS;
+unsigned int port = 2420;
 
 void updateLeds();
 void turn_off();
@@ -58,10 +59,31 @@ void setup() {
             while (true) {}
         } else delay(5000);
     }
+
+    // Get initial configuration
+    if (client.connect(SERVER_ADDR, SERVER_PORT)) {
+        Serial.println("Connected to server!");
+        client.println("GET /api/currentTime HTTP/1.0");
+        client.println();
+    } else {
+        Serial.print("Error while connecting to ");
+        Serial.print(SERVER_ADDR);
+        Serial.print(':');
+        Serial.println(SERVER_PORT);
+    }
 }
 
+bool msgReceived = false;
 void loop() {
     /* Connection success */
+    if (client.available()) {
+        char c = client.read();
+        Serial.print(c);
+        msgReceived = true;
+    } else if (msgReceived) {
+        Serial.println();
+        msgReceived = false;
+    }
     // Set colors & update LEDs
     // rainbow(true);
     // static_color(192, 57, 43);
