@@ -1,3 +1,7 @@
+.vscode/c_cpp_properties.json
+
+client/pinlayout.pdf
+
 server/server/node_modules/*
 server/server/package-lock.json
 server/postgres/volumes/*
