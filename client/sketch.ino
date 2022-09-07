@@ -73,16 +73,35 @@ void setup() {
     }
 }
 
+// Variables for handling the API response
 bool msgReceived = false;
+bool msgNewline = false;
+bool msgHeaderDone = false;
+String msg = "";
 void loop() {
     /* Connection success */
     if (client.available()) {
         char c = client.read();
+        // Add character to message if body of response was reached
+        if (msgHeaderDone) msg += c;
+        // If not, check if body of response was reached
+        else if (msgNewline && c == '\n') msgHeaderDone = true;
+        // If not, check if the current character is a newline
+        else if (c == '\n') msgNewline = true;
+        // If not, make sure the current character is not identified as newline in the next round
+        // Ignore carriage return character (ascii: 13)
+        else if ((int)c != 13) msgNewline = false;
         Serial.print(c);
         msgReceived = true;
     } else if (msgReceived) {
         Serial.println();
+        Serial.print("Full message: ");
+        Serial.println(msg);
+        // Reset values
         msgReceived = false;
+        msgHeaderDone = false;
+        msgNewline = false;
+        msg = "";
     }
     // Set colors & update LEDs
     // rainbow(true);
