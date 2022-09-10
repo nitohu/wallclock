@@ -65,8 +65,10 @@ void setup() {
     // Get initial configuration
     if (client.connect(SERVER_ADDR, SERVER_PORT)) {
         Serial.println("Connected to server!");
-        client.println("GET /api/currentTime HTTP/1.0");
-        client.println();
+        char tmsg[300];
+        sprintf(tmsg, "{\"token\": \"%s\"}", SERVER_AUTH);
+        client.printf("POST /api/config HTTP/1.1\r\nHost: %s:%d\r\nContent-Length: %d\r\nContent-Type: application/json\r\nConnection: close\r\n\r\n", SERVER_ADDR, SERVER_PORT, strlen(tmsg));
+        client.printf("%s\r\n\r\n", tmsg);
     } else {
         Serial.printf("Error while connecting to %s:%d\n", SERVER_ADDR, SERVER_PORT);
         // Make sure client is able to receive requests in the future if server is back
@@ -106,8 +108,7 @@ void loop() {
         Serial.print(c);
         receive_msg = true;
     } else if (receive_msg) {
-        Serial.println();
-        Serial.printf("Full message: ");
+        Serial.print("\nFull message: ");
         Serial.println(msg);
         // Reset values
         receive_msg = false;

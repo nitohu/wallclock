@@ -7,6 +7,31 @@ const router = express.Router()
 
 router.use(express.json())
 
+const getDeviceByToken = async (res, token) => {
+    let device = undefined
+    try {
+        device = await Device.FindByToken(token)
+    } catch (e) {
+        res.status(404).send({error: `Device with token ${token} not found.`})
+        throw e;
+    }
+
+    if (!device.active){
+        res.status(403).send({error: "Device is not active."})
+        throw new Error();
+    }
+
+    device.updateLastConn()
+    try {
+        await device.write()
+    } catch (e) {
+        logger.warn(`Error while writing device ${device.name} to database: ${e}`)
+        throw e
+    }
+
+    return device
+}
+
 router.get("/generateDeviceToken", auth, async (req, res) => {
     if (!req.query.id) return res.status(400).send({error: "Please provide a device id."})
     let device = undefined
@@ -46,21 +71,28 @@ router.get("/currentTime", async (req, res) => {
     })
 })
 
-router.get("/currentMode", async (req, res) => {
+router.post("/config", async (req, res) => {
     let device = undefined
+    logger.info(`Body: ${JSON.stringify(req.body)}`)
     try {
-        device = await Device.FindByToken(req.body.token)
+        device = await getDeviceByToken(res, req.body.token)
     } catch (e) {
-        return res.status(404).send({error: `Device with token ${req.body.token} not found.`})
+        return;
     }
 
-    if (!device.active) return res.status(403).send({error: "Device is not active."})
+    return res.send({
+        timestamp: Date.now(),
+        mode: device.getMode(),
+        color: device.getColor()
+    })
+})
 
-    device.updateLastConn()
+router.post("/currentMode", async (req, res) => {
+    let device = undefined
     try {
-        await device.write()
-    } catch (e) {
-        logger.warn(`Error while writing device ${device.name} to database: ${e}`)
+        device = await getDeviceByToken(req.body.token)
+    } catch(e) {
+        return;
     }
 
     const r = {
