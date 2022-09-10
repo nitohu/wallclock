@@ -19,9 +19,12 @@ short offset = 0;
 // Delay in ms (will be configurable)
 unsigned long del = 10;
 // Wifi stuff
-WiFiClient client;
-int wifiStatus = WL_IDLE_STATUS;
 unsigned int port = 2420;
+WiFiClient client;
+WiFiServer server(port);
+int wifiStatus = WL_IDLE_STATUS;
+// If true the initial configuration was received and the server can receive requests
+bool cnfg_received = false;
 
 void updateLeds();
 void turn_off();
@@ -47,9 +50,7 @@ void setup() {
 
     // Try to connect to wifi
     while (wifiStatus != WL_CONNECTED) {
-        Serial.print("Try to connect to ");
-        Serial.print(WIFI_SSID);
-        Serial.println();
+        Serial.printf("Try to connect to %s\n", WIFI_SSID);
         // Try to connect
         wifiStatus = WiFi.begin(WIFI_SSID, WIFI_PASS);
         if (wifiStatus == WL_CONNECTED) Serial.println("Connection success!");
@@ -59,6 +60,7 @@ void setup() {
             while (true) {}
         } else delay(5000);
     }
+    /* Connection success */
 
     // Get initial configuration
     if (client.connect(SERVER_ADDR, SERVER_PORT)) {
@@ -66,21 +68,31 @@ void setup() {
         client.println("GET /api/currentTime HTTP/1.0");
         client.println();
     } else {
-        Serial.print("Error while connecting to ");
-        Serial.print(SERVER_ADDR);
-        Serial.print(':');
-        Serial.println(SERVER_PORT);
+        Serial.printf("Error while connecting to %s:%d\n", SERVER_ADDR, SERVER_PORT);
+        // Make sure client is able to receive requests in the future if server is back
+        cnfg_received = true;
+        client.stop();
     }
+
+    // Create Server
+    server.begin();
+    Serial.printf("Listening on %s:%d\n", WiFi.localIP().toString().c_str(), port);
 }
 
-// Variables for handling the API response
-bool msgReceived = false;
+/**
+ * Variables for handling API response
+ * 
+ */
+// If true we are currently receiving a request/response
+bool receive_msg = false;
 bool msgNewline = false;
 bool msgHeaderDone = false;
 String msg = "";
 void loop() {
-    /* Connection success */
+    // Check if response/request was sent & read it's body
     if (client.available()) {
+        // Reset msg variable if we start receiving request
+        if (!receive_msg) msg = "";
         char c = client.read();
         // Add character to message if body of response was reached
         if (msgHeaderDone) msg += c;
@@ -92,16 +104,27 @@ void loop() {
         // Ignore carriage return character (ascii: 13)
         else if ((int)c != 13) msgNewline = false;
         Serial.print(c);
-        msgReceived = true;
-    } else if (msgReceived) {
+        receive_msg = true;
+    } else if (receive_msg) {
         Serial.println();
-        Serial.print("Full message: ");
+        Serial.printf("Full message: ");
         Serial.println(msg);
         // Reset values
-        msgReceived = false;
+        receive_msg = false;
         msgHeaderDone = false;
         msgNewline = false;
-        msg = "";
+        cnfg_received = true;
+        client.stop();
+    }
+    // Check if request was sent
+    if (cnfg_received && !receive_msg) client = server.available();
+    else if (cnfg_received && client && !receive_msg) {
+        Serial.println("New client connected.");
+        String req = client.readStringUntil('\r');
+        // Read last \n
+        client.read();
+        Serial.printf("Request: %s\n", req.c_str());
+        // TODO: Handle request to switch mode
     }
     // Set colors & update LEDs
     // rainbow(true);
