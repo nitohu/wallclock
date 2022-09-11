@@ -44,22 +44,25 @@ router.get("/generateDeviceToken", auth, async (req, res) => {
     res.send({token: token})
 })
 
+// Can be used by clients / form to update the current configuration of device
 router.post("/updateMode", auth, async (req, res) => {    
     let device = undefined
+    // Find device
     try {
         device = await Device.FindByID(req.body.id)
     } catch (e) {
         logger.info(e)
         return res.status(404).send({error: `Device with id ${req.body.id} cannot be founbd.`})
     }
-    let color = undefined
-    if (req.body.color) color = req.body.color
+    // Save to database
     try {
         await device.updateMode(req.body.mode, req.body.color)
     } catch (e) {
         console.log(e)
         return res.status(400).send({error: e})
     }
+    // Update actual device
+    device.push()
 
     return res.send({success: `Mode was successfully updated to ${req.body.mode}.`})
 })
@@ -71,6 +74,7 @@ router.get("/currentTime", async (req, res) => {
     })
 })
 
+// Used by the arduino to get initial configuration
 router.post("/config", async (req, res) => {
     let device = undefined
     logger.info(`Body: ${JSON.stringify(req.body)}`)
@@ -83,7 +87,7 @@ router.post("/config", async (req, res) => {
     return res.send({
         // Return timestamp as seconds
         timestamp: Date.now()/1000,
-        mode: device.getMode(),
+        mode: device.mode.name,
         color: device.getColor()
         // TODO: add brightness, on/off
     })
@@ -98,7 +102,7 @@ router.post("/currentMode", async (req, res) => {
     }
 
     const r = {
-        mode: device.getMode(),
+        mode: device.mode.name,
         color: device.getColor()
     }
     return res.send(r)

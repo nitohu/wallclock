@@ -2,10 +2,12 @@ const jwt = require("jsonwebtoken")
 const db = require("../db")
 const config = require("../config")
 const logger = require("../logger")
+const https = require("http")
+const { DeviceMode, modes } = require("../models/device_mode")
 
 const validModes = [
-    "gtime",
-    "stime",
+    "gclock",
+    "sclock",
     "rainbow",
     "static",
     "pulse",
@@ -27,6 +29,9 @@ class Device {
     name = ""
     ip = ""
     active = true
+    mode = modes[0]
+    color = ""
+    // TODO: add brightness, on/off, additional settings
 
     constructor(name, ip) {
         if (name !== undefined) this.name = name
@@ -42,7 +47,15 @@ class Device {
     getLastConn() { return this.#lastConn }
     getLastConnStr() { return (this.#lastConn) ? this.#lastConn.toLocaleString() : undefined }
     getToken() { return this.#token }
-    getMode() { return this.#mode }
+    getMode() { 
+        for (let i = 0; i < modes.length; i++) {
+            const mode = modes[i]
+            if (mode.name == this.#mode) {
+                return mode
+            }
+        }
+        return null
+    }
     getColor() { return this.#color }
 
     updateLastConn() {
@@ -117,6 +130,9 @@ class Device {
         this.#lastConn = r.last_conn
         this.#mode = r.mode
         this.#color = r.color
+
+        this.mode = this.getMode()
+        this.color = this.#color
     }
 
     async findByToken(token) {
@@ -139,6 +155,9 @@ class Device {
         this.#lastConn = r.last_conn
         this.#mode = r.mode
         this.#color = r.color
+
+        this.mode = this.getMode()
+        this.color = this.#color
     }
     
     generateToken() {
@@ -159,6 +178,50 @@ class Device {
         let r = await db.query(q, [this.#id, this.#mode, this.#color])
         if (!r) throw new Error("Something bad happened.")
         if (r.rowCount === 0) throw new Error("No row was affected.")
+
+        this.mode = this.getMode()
+    }
+
+    push() {
+        // Validate ip
+        if (!this.ip.match(/^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}/)) {
+            return;
+        }
+        const data = JSON.stringify({
+            mode: this.#mode,
+            color: this.color,
+            // timestamp: Date.now(),
+            // brightness: this.brightness,
+            // on
+        })
+        let ip = this.ip, port = 80;
+        if (this.ip.includes(":")) {
+            try {
+                const a = this.ip.split(":")
+                ip = a[0]
+                port = Number.parseInt(a[1])
+            } catch(e) {
+                logger.warn(e)
+            }
+        }
+        const o = {
+            hostname: ip,
+            port,
+            path: "/",
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Content-Length": data.length,
+            },
+        }
+        const req = https.request(o, res => {
+            logger.info(`clock's status code: ${res.statusCode}`)
+        })
+        req.on("error", err => {
+            logger.warn(`Probably expected; ${err}`)
+        })
+        req.write(data)
+        req.end()
     }
 
     static async FindByID(id) {
@@ -190,6 +253,8 @@ class Device {
             d.#mode = r.rows[i].mode
             d.#color = r.rows[i].color
             
+            d.mode = d.getMode()
+
             devices.push(d)
         }
         return devices

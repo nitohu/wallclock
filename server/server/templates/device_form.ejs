@@ -72,15 +72,19 @@
     
         <!-- TODO: Improve ; this is just a temporary solution -->
         <select id="currentModeSelector" name="cmode" class="form-control">
-            <option value="stime">Simple Time</option>
-            <option value="gtime">Gradient Time</option>
-            <option value="rainbow">Rainbow</option>
-            <option value="static" class="configurable">Static Color</option>
-            <option value="pulse" class="configurable">Pulse</option>
-            <option value="fade" class="configurable">Fade</option>
-            <option value="white" class="configurable">White</option>
+            <option value="sclock" <% if (device.mode && device.mode.name == "sclock") { %> selected <% } %> >Simple Time</option>
+            <option value="gclock" <% if (device.mode && device.mode.name == "gclock") { %> selected <% } %> >Gradient Time</option>
+            <option value="rainbow" <% if (device.mode && device.mode.name == "rainbow") { %> selected <% } %> >Rainbow</option>
+            <option value="static" class="configurable" <% if (device.mode && device.mode.name == "static") { %> selected <% } %> >Static Color</option>
+            <option value="pulse" class="configurable" <% if (device.mode && device.mode.name == "pulse") { %> selected <% } %> >Pulse</option>
+            <option value="fade" class="configurable" <% if (device.mode && device.mode.name == "fade") { %> selected <% } %> >Fade</option>
         </select>
-        <input type="color" name="currentColor" id="currentColor" class="form-control" style="visibility: hidden;" />
+        <br />
+        <!-- TODO: Add more configurables -->
+        <input type="color" name="currentColor" id="currentColor" class="form-control"
+        <% if (device.color) { %> value="<%= device.color %>" <% } %>
+        <% if (device.mode && !device.mode.isConfigurable) { %> style="visibility: hidden;" <% } %> />
+        <br />
         <button class="btn btn-secondary btn-sm" id="updateMode">Update Mode</button>
     </div>
 </div>

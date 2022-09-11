@@ -64,6 +64,6 @@ const modes = [
 ]
 
 module.exports = {
-    model: DeviceMode,
+    DeviceMode,
     modes
 }
