@@ -54,6 +54,7 @@ void fade_effect();
 void pulse(short cr, short cg, short cb);
 void rainbow(bool rotate);
 void static_color(short cr, short cg, short cb);
+void clock_simple();
 void white();
 
 void setup() {
@@ -169,9 +170,7 @@ void loop() {
         fade_effect();
         break;
     case MODE_CLOCK_SIMPLE:
-        // TODO: Implement mode
-        Serial.println("Not implemented yet");
-        current_effect = MODE_STATIC;
+        clock_simple();
         break;
     case MODE_CLOCK_GRADIENT:
         // TODO: Implement mode
@@ -246,9 +245,8 @@ void process_message(JSONVar msg) {
         }
     }
     if (msg.hasOwnProperty("timestamp")) {
-        time_t ctime = now();
-        ctime = (long) msg["timestamp"];
-        Serial.printf("Time: %lld, %d:%d:%d\n", ctime, hour(ctime), minute(ctime), second(ctime));
+        time_t t = (long) msg["timestamp"];
+        setTime(t);
     }
 }
 
@@ -375,6 +373,35 @@ void static_color(short cr, short cg, short cb) {
     eff_b = cb;
 
     updateLeds();
+}
+
+// Simple clock effect, currently red for hour, green for minute and blue for second
+void clock_simple() {
+    // Problem: Due to the delay between server taking timestamp & client receiving the request the time will be a little bit in the past
+    // TODO: Remove addition when timezone can be set server side
+    int ch = (hourFormat12() + 2) % 12;
+    int cm = minute();
+    int h_led = (LED_COUNT / 12) * ch + ((float)LED_COUNT / 12 / 60) * cm;
+    int m_led = (LED_COUNT / 60) * cm;
+    int s_led = (LED_COUNT / 60) * second();
+    Serial.printf("LED hour: %d ; LED minute: %d ; LED second: %d\n", h_led, m_led, s_led);
+    for (int i = 0; i < LED_COUNT; i++) {
+        // hour
+        if (i == h_led || i == (h_led+1)) {
+            leds[i] = CRGB(255*brightness, 0, 0);
+        }
+        // minute
+        else if (i == m_led || i == (m_led+1)) {
+            leds[i] = CRGB(0, 255*brightness, 0);
+        }
+        // second
+        else if (i == s_led || i == (s_led+1)) {
+            leds[i] = CRGB(0, 0, 255*brightness);
+        }
+        // everything else off
+        else leds[i] = CRGB(0, 0, 0);
+    }
+    FastLED.show();
 }
 
 void white() {
