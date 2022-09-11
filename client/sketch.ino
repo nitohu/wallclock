@@ -1,6 +1,7 @@
 #include <FastLED.h>
 #include <ESP8266WiFi.h>
 #include <Arduino_JSON.h>
+#include <TimeLib.h>
 
 #define LED_COUNT   120
 #define LED_PIN     14
@@ -243,6 +244,11 @@ void process_message(JSONVar msg) {
         } else {
             Serial.printf("Error: No valid color format received, need hex: %s (%d)\n", color, strlen(color));
         }
+    }
+    if (msg.hasOwnProperty("timestamp")) {
+        time_t ctime = now();
+        ctime = (long) msg["timestamp"];
+        Serial.printf("Time: %lld, %d:%d:%d\n", ctime, hour(ctime), minute(ctime), second(ctime));
     }
 }
 

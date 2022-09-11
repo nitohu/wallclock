@@ -18,6 +18,7 @@ Used libraries:
 * FastLED: [https://www.arduino.cc/reference/en/libraries/fastled/](https://www.arduino.cc/reference/en/libraries/fastled/)
 * ESP8266WiFi: [https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WiFi](https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WiFi)
 * Arduino_JSON: [https://www.arduino.cc/reference/en/libraries/arduino_json/](https://www.arduino.cc/reference/en/libraries/arduino_json/)
+* TimeLib: [https://github.com/PaulStoffregen/Time](https://github.com/PaulStoffregen/Time)
 
 Pictures will follow.
 
