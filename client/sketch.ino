@@ -18,9 +18,9 @@ enum modes {
 } current_effect;
 // Color settings, will not be modified by functions using different colors, will only be overwritten by request/response
 unsigned short r = 255, g = 255, b = 255;
-short is_on = 1;
+bool is_on = true;
 // Brightness (0 -> 1)
-float brightness = 0.3f;
+double brightness = 0.3;
 // Delay in ms (will be configurable)
 unsigned long del = 10;
 /**
@@ -39,7 +39,7 @@ bool cnfg_received = false;
  */
 // Current colors used in effect, can be manipulated by effects changing colors & reset between changing modes
 unsigned short eff_r = r, eff_g = g, eff_b = b;
-float eff_brightness = brightness;
+double eff_brightness = brightness;
 // Mode (will be necessary for some effects)
 unsigned short m = 0;
 short offset = 0;
@@ -158,7 +158,7 @@ void loop() {
         client.read();
         Serial.printf("Request: %s\n", req.c_str());
     }
-    
+
     // Set colors & update LEDs
     switch (current_effect) {
     case MODE_STATIC:
@@ -246,18 +246,30 @@ void process_message(JSONVar msg) {
             Serial.printf("Error: No valid color format received, need hex: %s (%d)\n", color, strlen(color));
         }
     }
+    // Set time
     if (msg.hasOwnProperty("timestamp")) {
         time_t t = (long) msg["timestamp"];
         setTime(t);
     }
+    // Change brightness
+    if (msg.hasOwnProperty("brightness")) {
+        int br = (int) msg["brightness"];
+        if (br > 100) br = 100;
+        else if (br < 0) br = 0;
+        brightness = br / 100.0;
+    }
+    // Set on/off
+    if (msg.hasOwnProperty("on")) {
+        is_on = (bool) msg["on"];
+    }
 }
 
 void turn_off() {
-    is_on = 0;
+    is_on = false;
 }
 
 void turn_on() {
-    is_on = 1;
+    is_on = true;
 }
 
 // Helper function for static effects
@@ -328,16 +340,16 @@ void pulse(short cr, short cg, short cb) {
     if (m > 1) m = 0;
     // LED gets brighter
     if (m == 0) {
-        eff_brightness += 0.01f;
-        if (eff_brightness >= 0.99f) {
+        eff_brightness += 0.01;
+        if (eff_brightness >= 0.99) {
             m = 1;
             delay(100);
         }
     }
     // LED gets darker
     else {
-        eff_brightness -= 0.01f;
-        if (eff_brightness <= 0.01f) {
+        eff_brightness -= 0.01;
+        if (eff_brightness <= 0.01) {
             m = 0;
             delay(100);
         }
@@ -393,6 +405,10 @@ void static_color(short cr, short cg, short cb) {
 
 // Simple clock effect, currently red for hour, green for minute and blue for second
 void clock_simple() {
+    if (!is_on) {
+        updateLeds();
+        return;
+    }
     // Problem: Due to the delay between server taking timestamp & client receiving the request the time will be a little bit in the past
     int h_led = getHoursLED(), m_led = getMinutesLED(), s_led = getSecondsLED();
     for (int i = 0; i < LED_COUNT; i++) {
@@ -416,6 +432,10 @@ void clock_simple() {
 
 // Gradient clock effects, draws a gradient from minute -> hour (green) & hour -> minute (red)
 void clock_gradient() {
+    if (!is_on) {
+        updateLeds();
+        return;
+    }
     int ch = getHoursLED(), cm = getMinutesLED();
     // Draw from hour to minute
     for (int i = ch; i < (LED_COUNT*2) && (i%LED_COUNT) != cm; i++) {
