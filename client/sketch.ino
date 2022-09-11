@@ -25,7 +25,7 @@ unsigned long del = 10;
 /**
  * Wifi stuff
  */
-unsigned int port = 2420;
+const unsigned int port = 2420;
 WiFiClient client;
 WiFiServer server(port);
 int wifiStatus = WL_IDLE_STATUS;
@@ -217,6 +217,31 @@ void process_message(JSONVar msg) {
             current_effect = MODE_CLOCK_GRADIENT;
         } else {
             Serial.printf("Unknown mode '%s'\n", mode);
+        }
+    }
+    // Change color
+    // Currently string must start with # and must have a length of 7 characters (e.g. #00ff00)
+    if (msg.hasOwnProperty("color")) {
+        const char* color = (const char*) msg["color"];
+        // Parse hex string into RGB values
+        if (*color == '#' && strlen(color) == 7) {
+            char hex_red[3], hex_green[3], hex_blue[3];
+            // Split color string into it's component (r/g/b) strings
+            for (short i = 1; i < strlen(color); i++) {
+                if ((i-1) < 2) hex_red[i-1] = *(color+i);
+                else if ((i-1) < 4) hex_green[i-3] = *(color+i);
+                else hex_blue[i-5] = *(color+i);
+            }
+            // Add string termination to char arrays (prevent overflow)
+            hex_red[2] = '\0';
+            hex_green[2] = '\0';
+            hex_blue[2] = '\0';
+            // Convert hex values into decimal
+            r = (int) strtol(hex_red, nullptr, 16);
+            g = (int) strtol(hex_green, nullptr, 16);
+            b = (int) strtol(hex_blue, nullptr, 16);
+        } else {
+            Serial.printf("Error: No valid color format received, need hex: %s (%d)\n", color, strlen(color));
         }
     }
 }
