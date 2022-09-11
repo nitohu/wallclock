@@ -48,6 +48,9 @@ void process_message(JSONVar msg);
 void updateLeds();
 void turn_off();
 void turn_on();
+int getHoursLED();
+int getMinutesLED();
+int getSecondsLED();
 
 // Effects
 void fade_effect();
@@ -55,6 +58,7 @@ void pulse(short cr, short cg, short cb);
 void rainbow(bool rotate);
 void static_color(short cr, short cg, short cb);
 void clock_simple();
+void clock_gradient();
 void white();
 
 void setup() {
@@ -173,9 +177,7 @@ void loop() {
         clock_simple();
         break;
     case MODE_CLOCK_GRADIENT:
-        // TODO: Implement mode
-        Serial.println("Not implemented yet");
-        current_effect = MODE_STATIC;
+        clock_gradient();
         break;
     default:
         Serial.println("Warn: no valid mode selected.");
@@ -270,6 +272,20 @@ void updateLeds() {
         leds[i] = CRGB(rb, gb, bb);
     }
     FastLED.show();
+}
+
+int getHoursLED() {
+    // TODO: Remove addition when timezone can be set server side
+    int ch = (hourFormat12() + 2) % 12;
+    return (LED_COUNT / 12) * ch + ((float)LED_COUNT / 12 / 60) * minute();
+}
+
+int getMinutesLED() {
+    return (LED_COUNT / 60) * minute();
+}
+
+int getSecondsLED() {
+    return (LED_COUNT / 60) * second();
 }
 
 /**
@@ -378,13 +394,7 @@ void static_color(short cr, short cg, short cb) {
 // Simple clock effect, currently red for hour, green for minute and blue for second
 void clock_simple() {
     // Problem: Due to the delay between server taking timestamp & client receiving the request the time will be a little bit in the past
-    // TODO: Remove addition when timezone can be set server side
-    int ch = (hourFormat12() + 2) % 12;
-    int cm = minute();
-    int h_led = (LED_COUNT / 12) * ch + ((float)LED_COUNT / 12 / 60) * cm;
-    int m_led = (LED_COUNT / 60) * cm;
-    int s_led = (LED_COUNT / 60) * second();
-    Serial.printf("LED hour: %d ; LED minute: %d ; LED second: %d\n", h_led, m_led, s_led);
+    int h_led = getHoursLED(), m_led = getMinutesLED(), s_led = getSecondsLED();
     for (int i = 0; i < LED_COUNT; i++) {
         // hour
         if (i == h_led || i == (h_led+1)) {
@@ -400,6 +410,20 @@ void clock_simple() {
         }
         // everything else off
         else leds[i] = CRGB(0, 0, 0);
+    }
+    FastLED.show();
+}
+
+// Gradient clock effects, draws a gradient from minute -> hour (green) & hour -> minute (red)
+void clock_gradient() {
+    int ch = getHoursLED(), cm = getMinutesLED();
+    // Draw from hour to minute
+    for (int i = ch; i < (LED_COUNT*2) && (i%LED_COUNT) != cm; i++) {
+        leds[i%LED_COUNT] = CRGB(255, 0, 0);
+    }
+    // Draw from minute to hour
+    for (int i = cm; i < (LED_COUNT*2) && (i%LED_COUNT) != ch; i++) {
+        leds[i%LED_COUNT] = CRGB(0, 255, 0);
     }
     FastLED.show();
 }
