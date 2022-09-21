@@ -16,11 +16,10 @@
 <div class="container">
 <!-- Main Content -->
     <% if (device) { %>
-        <h1>Edit <%= device.name %></h1>
+        <h1 class="mb-3">Edit <%= device.name %></h1>
     <% } else { %>
-        <h1>Create Device</h1>
+        <h1 class="mb-3">Create Device</h1>
     <% } %>
-    <br/>
     <% if (err) { %>
         <div class="alert alert-warning">
             <%= err %>
@@ -68,22 +67,36 @@
     <hr />
     <!-- Toggle modes of clock (no need to always click on save) -->
     <div>
-        <h2>Current Mode</h2>
-    
-        <!-- TODO: Improve ; this is just a temporary solution -->
-        <select id="currentModeSelector" name="cmode" class="form-control">
-            <option value="sclock" <% if (device.mode && device.mode.name == "sclock") { %> selected <% } %> >Simple Time</option>
-            <option value="gclock" <% if (device.mode && device.mode.name == "gclock") { %> selected <% } %> >Gradient Time</option>
-            <option value="rainbow" <% if (device.mode && device.mode.name == "rainbow") { %> selected <% } %> >Rainbow</option>
-            <option value="static" class="configurable" <% if (device.mode && device.mode.name == "static") { %> selected <% } %> >Static Color</option>
-            <option value="pulse" class="configurable" <% if (device.mode && device.mode.name == "pulse") { %> selected <% } %> >Pulse</option>
-            <option value="fade" class="configurable" <% if (device.mode && device.mode.name == "fade") { %> selected <% } %> >Fade</option>
-        </select>
+        <h3 class="mb-3">General Settings</h3>
+        <div class="d-md-flex mb-3">
+            <div class="ms-2 w-100">
+                <label for="cmode">Current Mode</label>
+                <select name="cmode" id="currentModeSelector" class="form-control">
+                    <% modes.forEach((mode) => { %>
+                        <option value="<%= mode.name %>"
+                            <% if (device && device.mode && device.mode.name == mode.name) { %> selected <% } %>
+                            <% if (mode.isConfigurable) { %> class="configurable" <% } %>
+                            ><%= mode.displayName %></option>
+                    <% }) %>
+                </select>
+            </div>
+            <div class="ms-2 mt-auto d-md-inline-flex">
+                <input type="radio" class="btn-check" name="is_on" id="success-outlined" value="on" autocomplete="off"
+                <% if (device && device.isOn()) { %> checked <% } else if (!device) { %> checked <% } %> />
+                <label class="btn btn-outline-success" for="success-outlined">On</label>
+
+                <input type="radio" class="btn-check" name="is_on" id="danger-outlined" value="off" autocomplete="off" <% if (device && !device.isOn()) { %> checked <% } %> />
+                <label class="btn btn-outline-danger ms-1" for="danger-outlined">Off</label>
+            </div>
+        </div>
+        <label for="cbrightness">Brightness</label>
+        <input type="range" name="cbrightness" id="cbrightness" class="form-range" step="0.1" min="0" max="100"
+        <% if (device) { %> value="<%= device.getBrightness() %>" <% } %> >
         <br />
         <!-- TODO: Add more configurables -->
         <input type="color" name="currentColor" id="currentColor" class="form-control"
-        <% if (device.color) { %> value="<%= device.color %>" <% } %>
-        <% if (device.mode && !device.mode.isConfigurable) { %> style="visibility: hidden;" <% } %> />
+        <% if (device && device.color) { %> value="<%= device.color %>" <% } %>
+        <% if (device && device.mode && !device.mode.isConfigurable) { %> style="visibility: hidden;" <% } %> />
         <br />
         <button class="btn btn-secondary btn-sm" id="updateMode">Update Mode</button>
     </div>

@@ -40,13 +40,24 @@ function getCurrentMode() {
     }
 }
 
+function isOn() {
+    const inp = document.getElementsByName("is_on")
+    for (let i = 0; i < inp.length; i++) {
+        const el = inp[i]
+        if (el.value == "on" && el.checked) return true;
+    }
+    return false;
+}
+
 function updateCurrentMode() {
     const id = parameterList = new URLSearchParams(window.location.search).get("id")
     const req = new XMLHttpRequest()
     const body = {
         id,
         color: document.getElementById("currentColor").value,
-        mode: document.getElementById("currentModeSelector").value
+        mode: document.getElementById("currentModeSelector").value,
+        on: isOn(),
+        brightness: document.getElementById("cbrightness").value
     }
 
     req.onreadystatechange = function() {
@@ -58,12 +69,20 @@ function updateCurrentMode() {
                 const el = document.createElement("div")
                 el.classList = "alert alert-success"
                 el.innerHTML = res.success
+                const btn = document.createElement("button")
+                btn.classList = "btn-close"
+                btn.setAttribute("data-bs-dismiss", "alert")
+                el.appendChild(btn)
                 f.parentNode.insertBefore(el, f)
             } else {
                 const f = document.getElementsByTagName("form")[0]
                 const el = document.createElement("div")
                 el.classList = "alert alert-warning"
                 el.innerHTML = res.error
+                const btn = document.createElement("button")
+                btn.classList = "btn-close"
+                btn.setAttribute("data-bs-dismiss", "alert")
+                el.appendChild(btn)
                 f.parentNode.insertBefore(el, f)
             }
         }

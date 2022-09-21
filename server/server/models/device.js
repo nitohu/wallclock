@@ -3,7 +3,7 @@ const db = require("../db")
 const config = require("../config")
 const logger = require("../logger")
 const https = require("http")
-const { DeviceMode, modes } = require("../models/device_mode")
+const { DeviceMode, modes } = require("./device_mode")
 
 const validModes = [
     "gclock",
@@ -25,6 +25,8 @@ class Device {
     #token = ""
     #mode = ""
     #color = ""
+    #isOn = true
+    #brightness = 50
     // Public fields
     name = ""
     ip = ""
@@ -57,10 +59,23 @@ class Device {
         return null
     }
     getColor() { return this.#color }
+    getBrightness() { return this.#brightness }
+    isOn() { return this.#isOn }
+
+    setBrightness(brightness) {
+        let br = Number.parseFloat(brightness)
+        if (br === NaN) return;
+        if (br > 100.0) br = 100.0
+        else if (br < 0.0) br = 0.0
+        this.#brightness = br;
+    }
 
     updateLastConn() {
         this.#lastConn = new Date()
     }
+
+    turnOn() { this.#isOn = true }
+    turnOff() { this.#isOn = false }
 
     // Create database record
     async create() {
@@ -71,8 +86,8 @@ class Device {
 
         this.#createDate = new Date()
         this.#writeDate = new Date()
-        const q = "INSERT INTO device(active, name, ip, token, create_date, write_date, last_conn) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id"
-        let r = await db.query(q, [this.active, this.name, this.ip, this.token, this.#createDate, this.#writeDate, this.#lastConn])
+        const q = "INSERT INTO device(active, name, ip, token, create_date, write_date, last_conn, is_on, brightness) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id"
+        let r = await db.query(q, [this.active, this.name, this.ip, this.token, this.#createDate, this.#writeDate, this.#lastConn, this.#isOn, this.#brightness])
         if (!r || r.rowCount === 0)
             throw new Error("Something bad happened.")
         
@@ -87,8 +102,8 @@ class Device {
             throw new Error("Device has no name.")
         
         this.#writeDate = new Date()
-        const q = "UPDATE device SET name=$2, ip=$3, active=$4, token=$5, write_date=$6, last_conn=$7 WHERE id=$1 RETURNING id"
-        let r = await db.query(q, [this.#id, this.name, this.ip, this.active, this.token, this.#writeDate, this.#lastConn])
+        const q = "UPDATE device SET name=$2, ip=$3, active=$4, token=$5, write_date=$6, last_conn=$7, is_on=$8, brightness=$9 WHERE id=$1 RETURNING id"
+        let r = await db.query(q, [this.#id, this.name, this.ip, this.active, this.token, this.#writeDate, this.#lastConn, this.#isOn, this.#brightness])
         if (!r)
             throw new Error("Something bad happened.")
         if (r.rowCount === 0)
@@ -130,6 +145,8 @@ class Device {
         this.#lastConn = r.last_conn
         this.#mode = r.mode
         this.#color = r.color
+        this.#isOn = r.is_on
+        this.#brightness = r.brightness
 
         this.mode = this.getMode()
         this.color = this.#color
@@ -155,6 +172,8 @@ class Device {
         this.#lastConn = r.last_conn
         this.#mode = r.mode
         this.#color = r.color
+        this.#isOn = r.is_on
+        this.#brightness = r.brightness
 
         this.mode = this.getMode()
         this.color = this.#color
@@ -166,16 +185,19 @@ class Device {
         return this.#token
     }
 
-    async updateMode(mode, color) {
+    async updateMode(mode, color, isOn, brightness) {
         if (this.#id < 1) throw new Error("Device has no id, cannot write to database.")
         if (!validModes.includes(mode)) throw new Error("Please provide a valid mode.")
 
         // FIXME: Security vuln. ; color isn't checked ; SQL Injection possible
         this.#mode = mode
         this.#color = color
+        if (typeof(isOn) == "boolean")
+            this.#isOn = isOn
+        this.setBrightness(brightness)
 
-        const q = "UPDATE device SET mode=$2, color=$3 WHERE id=$1 RETURNING id"
-        let r = await db.query(q, [this.#id, this.#mode, this.#color])
+        const q = "UPDATE device SET mode=$2, color=$3, is_on=$4, brightness=$5 WHERE id=$1 RETURNING id"
+        let r = await db.query(q, [this.#id, this.#mode, this.#color, this.#isOn, this.#brightness])
         if (!r) throw new Error("Something bad happened.")
         if (r.rowCount === 0) throw new Error("No row was affected.")
 
@@ -189,10 +211,10 @@ class Device {
         }
         const data = JSON.stringify({
             mode: this.#mode,
-            color: this.color,
-            // timestamp: Date.now(),
-            // brightness: this.brightness,
-            // on
+            color: this.#color,
+            on: this.#isOn,
+            brightness: this.#brightness
+            // timestamp: Date.now()
         })
         let ip = this.ip, port = 80;
         if (this.ip.includes(":")) {
@@ -220,6 +242,7 @@ class Device {
         req.on("error", err => {
             logger.warn(`Probably expected; ${err}`)
         })
+        logger.info(`Sending ${data} to ${this.name} (${this.ip})`)
         req.write(data)
         req.end()
     }

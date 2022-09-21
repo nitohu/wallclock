@@ -1,6 +1,7 @@
 const express = require("express")
 const auth = require("../middleware/auth")
 const Device = require("../models/device")
+const { DeviceMode, modes } = require("../models/device_mode")
 const logger = require("../logger")
 
 const router = express.Router()
@@ -18,6 +19,7 @@ router.get("/", auth, async (req, res) => {
         settings: req.session.settings,
         title: "Create Device",
         device,
+        modes,
         err
     })
 })

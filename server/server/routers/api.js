@@ -56,7 +56,7 @@ router.post("/updateMode", auth, async (req, res) => {
     }
     // Save to database
     try {
-        await device.updateMode(req.body.mode, req.body.color)
+        await device.updateMode(req.body.mode, req.body.color, req.body.on, req.body.brightness)
     } catch (e) {
         console.log(e)
         return res.status(400).send({error: e})
@@ -101,6 +101,7 @@ router.post("/currentMode", async (req, res) => {
         return;
     }
 
+    logger.info(`Device ${device.name} asks for currentMode`)
     const r = {
         mode: device.mode.name,
         color: device.getColor()

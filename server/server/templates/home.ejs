@@ -49,7 +49,7 @@
                     <!-- <td><%= device.token %></td>
                     <td><%= device.getLastConnStr() %></td>
                     <td><%= device.getCreateDateStr() %></td> -->
-                    <td><%= device.getMode() %></td>
+                    <td><% if (device.getMode()) { %> <%= device.getMode().displayName %> <% } %></td>
                     <td><%= device.getWriteDateStr() %></td>
                     <td><%= device.active %></td>
                 </tr>
