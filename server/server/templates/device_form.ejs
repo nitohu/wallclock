@@ -93,10 +93,13 @@
         <input type="range" name="cbrightness" id="cbrightness" class="form-range" step="0.1" min="0" max="100"
         <% if (device) { %> value="<%= device.getBrightness() %>" <% } %> >
         <br />
-        <!-- TODO: Add more configurables -->
-        <input type="color" name="currentColor" id="currentColor" class="form-control"
-        <% if (device && device.color) { %> value="<%= device.color %>" <% } %>
-        <% if (device && device.mode && !device.mode.isConfigurable) { %> style="visibility: hidden;" <% } %> />
+        <div class="mode-settings">
+            <h3 class="mb-3">Mode settings</h3>
+            <!-- TODO: Add more configurables -->
+            <input type="color" name="currentColor" id="currentColor" class="form-control color-control"
+                <% if (device && device.color) { %> value="<%= device.color %>" <% } %>
+                <% if (device && device.mode && !device.mode.isConfigurable) { %> style="visibility: hidden;" <% } %> />
+        </div>
         <br />
         <button class="btn btn-secondary btn-sm" id="updateMode">Update Mode</button>
     </div>

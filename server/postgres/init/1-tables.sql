@@ -25,4 +25,18 @@ CREATE TABLE device (
     brightness real
 );
 
+CREATE TABLE mode_settings (
+    device_id int references device(id),
+    name text,
+    primary key(device_id, name),
+    -- Effect speed (e.g. rotation speed for rainbow, fading speed for fade)
+    speed integer,
+    -- Effect color (hex)
+    color text,
+    -- Use random colors? (for pulse)
+    random_color boolean,
+    -- Show seconds?
+    show_seconds boolean
+);
+
 COMMIT;

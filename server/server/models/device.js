@@ -3,18 +3,9 @@ const db = require("../db")
 const config = require("../config")
 const logger = require("../logger")
 const https = require("http")
-const { DeviceMode, modes } = require("./device_mode")
+const { validModes, modes } = require("./device_mode")
+const { DeviceModeSettings } = require("./mode_settings")
 
-const validModes = [
-    "gclock",
-    "sclock",
-    "rainbow",
-    "static",
-    "pulse",
-    "fade",
-    "white",
-    "off"
-]
 
 class Device {
     // Private fields
@@ -27,13 +18,13 @@ class Device {
     #color = ""
     #isOn = true
     #brightness = 50
+    #settings = []
     // Public fields
     name = ""
     ip = ""
     active = true
     mode = modes[0]
     color = ""
-    // TODO: add brightness, on/off, additional settings
 
     constructor(name, ip) {
         if (name !== undefined) this.name = name
@@ -60,6 +51,11 @@ class Device {
     }
     getColor() { return this.#color }
     getBrightness() { return this.#brightness }
+    getCurrentModeSettings() {
+        for (let i = 0; i < this.#settings.length; i++) {
+            if (this.#settings[i].getName() == this.#mode) return this.#settings[i]
+        }
+    }
     isOn() { return this.#isOn }
 
     setBrightness(brightness) {
@@ -93,6 +89,18 @@ class Device {
         
         r = r.rows[0]
         this.#id = r.id
+
+        // Create all modes for the device
+        logger.info(`${validModes.length} modes will be created`)
+        for (let i = 0; i < validModes.length; i++) {
+            logger.info(`Create mode: ${validModes[i]}`)
+            try {
+                const m = new DeviceModeSettings(validModes[i], this.#id)
+                await m.create()
+            } catch (e) {
+                logger.warn(`Error while creating mode ${validModes[i]}: ${e}`)
+            }
+        }
     }
     // Write to database
     async write() {
@@ -121,8 +129,24 @@ class Device {
             throw new Error("An unexpected error occured")
         if (r.rowCount == 0)
             throw new Error("No row was affected.")
-        
+        // TODO: Delete mode settings if not cascading
         return r.rows[0]
+    }
+
+    async getSettings() {
+        if (this.#id <= 0)
+            throw new Error("Invalid ID.")
+        this.#settings = []
+        const r = await db.query("SELECT * FROM mode_settings WHERE device_id=$1", [this.#id])
+        for (let i = 0; i < r.rowCount; i++) {
+            const m = r.rows[0]
+            let t = new DeviceModeSettings(m.name, m.device_id)
+            t.setSpeed(m.speed)
+            t.setColor(m.color)
+            t.setRandomColor(m.random_color)
+            t.setShowSeconds(m.show_seconds)
+            this.#settings.push(t)
+        }
     }
 
     // FindByID
@@ -150,6 +174,8 @@ class Device {
 
         this.mode = this.getMode()
         this.color = this.#color
+
+        this.getSettings()
     }
 
     async findByToken(token) {
@@ -157,7 +183,7 @@ class Device {
             throw new Error("Please enter a valid token.")
         
         // NOTE: SQL Injection possible? ; depends on db.query function
-        let r = await db.query("SELECT * FROM device WHERE token=$1", [token])
+        let r = await db.query("SELECT * FROM device WHERE token=$1 AND active=true", [token])
         if (!r || r.rowCount === 0)
             throw new Error(`No device with ${token} found.`)
         
@@ -177,6 +203,8 @@ class Device {
 
         this.mode = this.getMode()
         this.color = this.#color
+
+        this.getSettings()
     }
     
     generateToken() {

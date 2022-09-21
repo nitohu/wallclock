@@ -88,8 +88,9 @@ router.post("/config", async (req, res) => {
         // Return timestamp as seconds
         timestamp: Date.now()/1000,
         mode: device.mode.name,
-        color: device.getColor()
-        // TODO: add brightness, on/off
+        color: device.getColor(),
+        brightness: device.getBrightness(),
+        on: device.isOn()
     })
 })
 

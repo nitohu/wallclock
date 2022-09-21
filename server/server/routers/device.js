@@ -37,6 +37,7 @@ router.post("/", auth, async (req, res) => {
                 settings: req.session.settings,
                 title: "Edit Device",
                 device,
+                modes,
                 err
             })
         }
@@ -55,6 +56,7 @@ router.post("/", auth, async (req, res) => {
             settings: req.session.settings,
             title: "Edit Device",
             device,
+            modes,
             err
         })
     }
