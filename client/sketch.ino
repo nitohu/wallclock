@@ -397,7 +397,7 @@ void rainbow(bool rotate) {
 void static_color(short cr, short cg, short cb) {
     // FIXME: Colors are not represented properly (maybe need to switch to HSV)
     eff_r = cr;
-    eff_g = cb;
+    eff_g = cg;
     eff_b = cb;
 
     updateLeds();
