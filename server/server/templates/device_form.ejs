@@ -75,7 +75,7 @@
                     <% modes.forEach((mode) => { %>
                         <option value="<%= mode.name %>"
                             <% if (device && device.mode && device.mode.name == mode.name) { %> selected <% } %>
-                            <% if (mode.isConfigurable) { %> class="configurable" <% } %>
+                            <% if (mode.isConfigurable) { %> class="<% mode.configs.forEach((config) => { %> configurable-<%= config %> <% }) %>" <% } %>
                             ><%= mode.displayName %></option>
                     <% }) %>
                 </select>
@@ -89,19 +89,35 @@
                 <label class="btn btn-outline-danger ms-1" for="danger-outlined">Off</label>
             </div>
         </div>
-        <label for="cbrightness">Brightness</label>
-        <input type="range" name="cbrightness" id="cbrightness" class="form-range" step="0.1" min="0" max="100"
-        <% if (device) { %> value="<%= device.getBrightness() %>" <% } %> >
-        <br />
-        <div class="mode-settings">
-            <h3 class="mb-3">Mode settings</h3>
-            <!-- TODO: Add more configurables -->
-            <input type="color" name="currentColor" id="currentColor" class="form-control color-control"
-                <% if (device && device.color) { %> value="<%= device.color %>" <% } %>
-                <% if (device && device.mode && !device.mode.isConfigurable) { %> style="visibility: hidden;" <% } %> />
+        <div class="ms-2">
+            <label for="cbrightness">Brightness</label>
+            <input type="range" name="cbrightness" id="cbrightness" class="form-range" step="0.1" min="0" max="100"
+                <% if (device) { %> value="<%= device.getBrightness() %>" <% } %> >
+            <br />
+            <div class="mode-settings">
+                <h3 class="mb-3 mt-3">Mode settings</h3>
+                <!-- TODO: Add more configurables -->
+                <input type="color" name="currentColor" id="currentColor" class="form-control color-control"
+                    <% if (device && device.color) { %> value="<%= device.color %>" <% } %>
+                    <% if (device && device.mode && device.mode.configs && !device.mode.configs.includes("color")) { %> style="visibility: hidden;" <% } %> />
+                <br />
+                <div class="slider-group" id="effectSpeedGroup"
+                    <% if (device && device.mode && device.mode.configs && !device.mode.configs.includes("speed")) { %> 
+                        style="visibility: hidden;"
+                    <% } %>
+                >
+                    <label for="effectSpeed">Delay</label>
+                    <input type="range" name="effectSpeed" id="effectSpeed" class="form-range" step="1" min="0" max="1000"
+                        <% if (device && device.mode && device.mode.configs && !device.mode.configs.includes("speed")) { %> 
+                            value="<%= device.getCurrentModeSettings().getSpeed() %>"
+                        <% } %> >
+                    <span class="slider-min">0</span>
+                    <span class="slider-max">1000</span>
+                </div>
+            </div>
+            <br />
+            <button class="btn btn-secondary btn-sm" id="updateMode">Update Mode</button>
         </div>
-        <br />
-        <button class="btn btn-secondary btn-sm" id="updateMode">Update Mode</button>
     </div>
 </div>
 

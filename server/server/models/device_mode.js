@@ -10,8 +10,7 @@ const validModes = [
 
 const mode_config = [
     "color",
-    "speed",
-    "rotate"
+    "speed"
 ]
 
 /**
@@ -22,27 +21,33 @@ class DeviceMode {
     name = ""
     displayName = ""
     isConfigurable = false
+    configs = []
 
-    constructor(name, displayName, isConfigurable) {
+    constructor(name, displayName, isConfigurable, configs) {
         this.name = name
         this.displayName = displayName
         this.isConfigurable = isConfigurable
+        if (!this.isConfigurable) return;
+        // only add valid configurations
+        for (let i = 0; i < configs.length; i++) {
+            if (mode_config.includes(configs[i])) this.configs.push(configs[i])
+        }
     }
 }
 
 const modes = [
-   new DeviceMode("sclock", "Simple Clock", false),
-   new DeviceMode("gclock", "Gradient Clock", false),
-   new DeviceMode("rainbow", "Color Rainbow", true),
-   new DeviceMode("static", "Static Color", true),
-   new DeviceMode("pulse", "Pulse", true),
-   new DeviceMode("fade", "Fade", true)
+    new DeviceMode("sclock", "Simple Clock", false),
+    new DeviceMode("gclock", "Gradient Clock", false),
+    new DeviceMode("rainbow", "Color Rainbow", true, ["speed"]),
+    new DeviceMode("static", "Static Color", true, ["color"]),
+    new DeviceMode("pulse", "Pulse", true, ["speed", "color"]),
+    new DeviceMode("fade", "Fade", true, ["speed"])
 ]
 
 module.exports = {
     validModes,
     modes,
-    // Can probably be removed
+    // TODO: Can probably be removed
     mode_config,
     DeviceMode
 }

@@ -48,3 +48,18 @@ footer {
 .justify-content-md-end {
     justify-content: flex-end!important;
 }
+
+.slider-group > span {
+    color: #777;
+    font-size: small;
+}
+
+.slider-group > .slider-min {
+    text-align: left;
+}
+
+.slider-group > .slider-max {
+    text-align: right;
+    float: right;
+}
+

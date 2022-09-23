@@ -184,6 +184,8 @@ void loop() {
         delay(200);
         break;
     }
+    // TODO: should probably be moved into functions which have a configurable speed
+    // otherwise updating the del will have an effect on all modes
     delay(del);
 }
 
@@ -262,6 +264,7 @@ void process_message(JSONVar msg) {
     if (msg.hasOwnProperty("on")) {
         is_on = (bool) msg["on"];
     }
+    // TODO: Change delay
 }
 
 void turn_off() {

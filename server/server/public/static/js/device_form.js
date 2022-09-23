@@ -32,11 +32,24 @@ function generateToken() {
 function getCurrentMode() {
     const self = document.getElementById("currentModeSelector") 
     const sel = self.options[self.selectedIndex]
-    console.log(sel)
-    if (sel.classList.contains("configurable")) {
-        document.getElementById("currentColor").style.visibility = "visible"
+    if (sel.className.includes("configurable")) {
+        let configs = [];
+        sel.classList.forEach((e) => configs.push(e.split("-")[1]))
+        
+        // TODO: add more configurations
+        if (configs.includes("color")) {
+            document.getElementById("currentColor").style.visibility = "visible"
+        } else {
+            document.getElementById("currentColor").style.visibility = "hidden"
+        }
+        if (configs.includes("speed")) {
+            document.getElementById("effectSpeedGroup").style.visibility = "visible"
+        } else {
+            document.getElementById("effectSpeedGroup").style.visibility = "hidden"
+        }
     } else {
         document.getElementById("currentColor").style.visibility = "hidden"
+        document.getElementById("effectSpeedGroup").style.visibility = "hidden"
     }
 }
 
@@ -57,7 +70,8 @@ function updateCurrentMode() {
         color: document.getElementById("currentColor").value,
         mode: document.getElementById("currentModeSelector").value,
         on: isOn(),
-        brightness: document.getElementById("cbrightness").value
+        brightness: document.getElementById("cbrightness").value,
+        speed: document.getElementById("effectSpeed").value
     }
 
     req.onreadystatechange = function() {

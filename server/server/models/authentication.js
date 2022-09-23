@@ -1,5 +1,8 @@
 const db = require("../db")
 
+/**
+ * NOTE: Can probably be deleted
+ */
 class Authentication {
     // Private fields
     #id = 0

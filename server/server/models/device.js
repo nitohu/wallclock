@@ -15,6 +15,7 @@ class Device {
     #lastConn = null
     #token = ""
     #mode = ""
+    // TODO: remove me after completely moved to ModeSettings
     #color = ""
     #isOn = true
     #brightness = 50
@@ -40,6 +41,10 @@ class Device {
     getLastConn() { return this.#lastConn }
     getLastConnStr() { return (this.#lastConn) ? this.#lastConn.toLocaleString() : undefined }
     getToken() { return this.#token }
+    /**
+     * Get information about the current mode that is set
+     * @returns DeviceMode record
+     */
     getMode() { 
         for (let i = 0; i < modes.length; i++) {
             const mode = modes[i]
@@ -51,6 +56,10 @@ class Device {
     }
     getColor() { return this.#color }
     getBrightness() { return this.#brightness }
+    /**
+     * Get the settings for the current mode
+     * @returns ModeSettings record
+     */
     getCurrentModeSettings() {
         for (let i = 0; i < this.#settings.length; i++) {
             if (this.#settings[i].getName() == this.#mode) return this.#settings[i]
@@ -91,16 +100,16 @@ class Device {
         this.#id = r.id
 
         // Create all modes for the device
-        logger.info(`${validModes.length} modes will be created`)
         for (let i = 0; i < validModes.length; i++) {
-            logger.info(`Create mode: ${validModes[i]}`)
             try {
                 const m = new DeviceModeSettings(validModes[i], this.#id)
                 await m.create()
+                this.#settings.push(m)
             } catch (e) {
                 logger.warn(`Error while creating mode ${validModes[i]}: ${e}`)
             }
         }
+        this.mode = this.getMode()
     }
     // Write to database
     async write() {
@@ -117,6 +126,7 @@ class Device {
         if (r.rowCount === 0)
             throw new Error("No row was affected.")
         
+        this.mode = this.getMode()
     }
 
     // Delete from database
@@ -133,13 +143,17 @@ class Device {
         return r.rows[0]
     }
 
-    async getSettings() {
+    /**
+     * Fetches all settings from the database linked to the device
+     */
+    async fetchSettings() {
+        // NOTE: Can be put in a static function in ModeSettings ().FetchSettings(device_id))
         if (this.#id <= 0)
             throw new Error("Invalid ID.")
         this.#settings = []
         const r = await db.query("SELECT * FROM mode_settings WHERE device_id=$1", [this.#id])
         for (let i = 0; i < r.rowCount; i++) {
-            const m = r.rows[0]
+            const m = r.rows[i]
             let t = new DeviceModeSettings(m.name, m.device_id)
             t.setSpeed(m.speed)
             t.setColor(m.color)
@@ -175,7 +189,7 @@ class Device {
         this.mode = this.getMode()
         this.color = this.#color
 
-        this.getSettings()
+        await this.fetchSettings()
     }
 
     async findByToken(token) {
@@ -204,7 +218,7 @@ class Device {
         this.mode = this.getMode()
         this.color = this.#color
 
-        this.getSettings()
+        await this.fetchSettings()
     }
     
     generateToken() {
@@ -213,7 +227,7 @@ class Device {
         return this.#token
     }
 
-    async updateMode(mode, color, isOn, brightness) {
+    async updateMode(mode, color, isOn, brightness, delay) {
         if (this.#id < 1) throw new Error("Device has no id, cannot write to database.")
         if (!validModes.includes(mode)) throw new Error("Please provide a valid mode.")
 
@@ -229,6 +243,12 @@ class Device {
         if (!r) throw new Error("Something bad happened.")
         if (r.rowCount === 0) throw new Error("No row was affected.")
 
+        // Update device specific settings
+        const modeSettings = this.getCurrentModeSettings()
+        modeSettings.setSpeed(delay)
+        modeSettings.setColor(color)
+        await modeSettings.write()
+
         this.mode = this.getMode()
     }
 
@@ -237,13 +257,23 @@ class Device {
         if (!this.ip.match(/^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}/)) {
             return;
         }
-        const data = JSON.stringify({
+        let data = {
             mode: this.#mode,
-            color: this.#color,
+            // color: this.#color,
             on: this.#isOn,
             brightness: this.#brightness
             // timestamp: Date.now()
-        })
+        }
+        if (this.mode.isConfigurable) {
+            const modeSettings = this.getCurrentModeSettings()
+            if (this.mode.configs.includes("color")) {
+                data.color = modeSettings.getColor()
+            }
+            if (this.mode.configs.includes("speed")) {
+                data.delay = modeSettings.getSpeed()
+            }
+        }
+        data = JSON.stringify(data)
         let ip = this.ip, port = 80;
         if (this.ip.includes(":")) {
             try {

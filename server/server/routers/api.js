@@ -54,9 +54,10 @@ router.post("/updateMode", auth, async (req, res) => {
         logger.info(e)
         return res.status(404).send({error: `Device with id ${req.body.id} cannot be founbd.`})
     }
+    // TODO: Probably need to check if values are actually included in request body (& maybe validate them as well)
     // Save to database
     try {
-        await device.updateMode(req.body.mode, req.body.color, req.body.on, req.body.brightness)
+        await device.updateMode(req.body.mode, req.body.color, req.body.on, req.body.brightness, req.body.speed)
     } catch (e) {
         console.log(e)
         return res.status(400).send({error: e})
@@ -84,30 +85,20 @@ router.post("/config", async (req, res) => {
         return;
     }
 
+    logger.info(`Device ${device.name} asks for configuration`)
+    let deviceSettings = undefined
+    if (device.mode.isConfigurable) {
+        deviceSettings = device.getCurrentModeSettings()
+    }
     return res.send({
         // Return timestamp as seconds
         timestamp: Date.now()/1000,
         mode: device.mode.name,
-        color: device.getColor(),
         brightness: device.getBrightness(),
-        on: device.isOn()
+        on: device.isOn(),
+        color: deviceSettings ? deviceSettings.getColor() : "#00ff00",
+        delay: deviceSettings ? deviceSettings.getSpeed() : 100
     })
-})
-
-router.post("/currentMode", async (req, res) => {
-    let device = undefined
-    try {
-        device = await getDeviceByToken(req.body.token)
-    } catch(e) {
-        return;
-    }
-
-    logger.info(`Device ${device.name} asks for currentMode`)
-    const r = {
-        mode: device.mode.name,
-        color: device.getColor()
-    }
-    return res.send(r)
 })
 
 module.exports = router

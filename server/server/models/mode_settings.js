@@ -24,6 +24,7 @@ class DeviceModeSettings {
     getColor() { return this.#color }
 
     setSpeed(speed) {
+        // TODO: check for max & min speed/delay
         this.#speed = speed
     }
     setColor(color) {
@@ -46,7 +47,7 @@ class DeviceModeSettings {
             throw new Error("Device ID or name invalid.")
 
         const q = "INSERT INTO mode_settings(device_id, name, speed, color, random_color, show_seconds) VALUES ($1, $2, $3, $4, $5, $6)"
-        let r = await db.query(q, [this.#deviceId, this.#name, this.#speed, this.#color, this.#randomColor, this.#showSeconds])
+        let r = await db.query(q, [this.#deviceId, this.#name, Number.parseInt(this.#speed), this.#color, this.#randomColor, this.#showSeconds])
         if (!r || r.rowCount === 0)
             throw new Error("Something bad happened.")
         
@@ -59,8 +60,8 @@ class DeviceModeSettings {
         if (!validModes.includes(this.#name))
             throw new Error("Invalid name.")
         
-        const q = "UPDATE device SET speed=$3, color=$4, random_color=$5, show_seconds=$6 WHERE name=$2 AND device_id=$1"
-        let r = await db.query(q, [this.#deviceId, this.#name, this.#color, this.#randomColor, this.#showSeconds])
+        const q = "UPDATE mode_settings SET speed=$3, color=$4, random_color=$5, show_seconds=$6 WHERE name=$2 AND device_id=$1"
+        let r = await db.query(q, [this.#deviceId, this.#name, Number.parseInt(this.#speed), this.#color, this.#randomColor, this.#showSeconds])
         if (!r)
             throw new Error("Something bad happened.")
         if (r.rowCount === 0)
@@ -72,7 +73,7 @@ class DeviceModeSettings {
     async delete() {
         if (this.#deviceId <= 0)
             throw new Error("Device ID must be greater than 0.")
-        const q = "DELETE FROM device WHERE device_id=$1 AND name=$2"
+        const q = "DELETE FROM mode_settings WHERE device_id=$1 AND name=$2"
         let r = await db.query(q, [this.#deviceId, this.#name])
         if (!r)
             throw new Error("An unexpected error occured")
