@@ -2,22 +2,7 @@ let mode_settings = [];
 
 // Get settings for each mode of current device
 (function () {
-    const id = new URLSearchParams(window.location.search).get("id")
-    const req = new XMLHttpRequest()
-
-    req.onreadystatechange = function() {
-        if (this.readyState === 4 && this.status === 200) {
-            mode_settings = JSON.parse(this.responseText)
-            console.log("Settings successfully loaded.")
-            console.log(mode_settings)
-        } else if (this.readyState === 4) {
-            console.warn(JSON.parse(this.responseText))
-        }
-    }
-
-    req.open("GET", `/api/getModeSettings?device_id=${id}`)
-    req.setRequestHeader("Content-Type", "application/json")
-    req.send()
+    fetchCurrentModeSettings()
 })()
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -69,16 +54,51 @@ function getCurrentMode() {
         } else {
             document.getElementById("currentColor").style.visibility = "hidden"
         }
+        if (configs.includes("showSeconds")) {
+            if (settings && settings.showSeconds) document.getElementById("showSeconds").checked = true
+            else document.getElementById("showSeconds").checked = false
+            document.getElementById("showSecondsGroup").style.visibility = "visible"
+        } else {
+            document.getElementById("showSecondsGroup").style.visibility = "hidden"
+        }
         if (configs.includes("speed")) {
             if (settings) document.getElementById("effectSpeed").value = settings.speed
             document.getElementById("effectSpeedGroup").style.visibility = "visible"
         } else {
             document.getElementById("effectSpeedGroup").style.visibility = "hidden"
         }
+        if (configs.includes("randomColor")) {
+            if (settings && settings.randomColor) document.getElementById("randomColor").checked = true
+            else document.getElementById("randomColor").checked = false
+            document.getElementById("randomColorGroup").style.visibility = "visible"
+        } else {
+            document.getElementById("randomColorGroup").style.visibility = "hidden"
+        }
     } else {
         document.getElementById("currentColor").style.visibility = "hidden"
         document.getElementById("effectSpeedGroup").style.visibility = "hidden"
+        document.getElementById("showSecondsGroup").style.visibility = "hidden"
+        document.getElementById("randomColorGroup").style.visibility = "hidden"
     }
+}
+
+function fetchCurrentModeSettings() {
+    const id = new URLSearchParams(window.location.search).get("id")
+    const req = new XMLHttpRequest()
+
+    req.onreadystatechange = function() {
+        if (this.readyState === 4 && this.status === 200) {
+            mode_settings = JSON.parse(this.responseText)
+            console.log("Settings successfully fetched...")
+            console.log(mode_settings)
+        } else if (this.readyState === 4) {
+            console.warn(JSON.parse(this.responseText))
+        }
+    }
+
+    req.open("GET", `/api/getModeSettings?device_id=${id}`)
+    req.setRequestHeader("Content-Type", "application/json")
+    req.send()
 }
 
 function isOn() {
@@ -99,7 +119,9 @@ function updateCurrentMode() {
         mode: document.getElementById("currentModeSelector").value,
         on: isOn(),
         brightness: document.getElementById("cbrightness").value,
-        speed: document.getElementById("effectSpeed").value
+        speed: document.getElementById("effectSpeed").value,
+        randomColor: document.getElementById("randomColor").checked,
+        showSeconds: document.getElementById("showSeconds").checked
     }
 
     req.onreadystatechange = function() {
@@ -133,4 +155,6 @@ function updateCurrentMode() {
     req.open("POST", "/api/updateMode")
     req.setRequestHeader("Content-Type", "application/json")
     req.send(JSON.stringify(body))
+
+    fetchCurrentModeSettings()
 }

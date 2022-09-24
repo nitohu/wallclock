@@ -58,7 +58,14 @@ router.post("/updateMode", auth, async (req, res) => {
     // TODO: Probably need to check if values are actually included in request body (& maybe validate them as well)
     // Save to database
     try {
-        await device.updateMode(req.body.mode, req.body.color, req.body.on, req.body.brightness, req.body.speed)
+        await device.updateMode(
+            req.body.mode,
+            req.body.color,
+            req.body.on,
+            req.body.brightness,
+            req.body.speed,
+            req.body.randomColor,
+            req.body.showSeconds)
     } catch (e) {
         console.log(e)
         return res.status(400).send({error: e})
@@ -113,15 +120,28 @@ router.post("/config", async (req, res) => {
     if (device.mode.isConfigurable) {
         deviceSettings = device.getCurrentModeSettings()
     }
-    return res.send({
+    const body = {
         // Return timestamp as seconds
         timestamp: Date.now()/1000,
         mode: device.mode.name,
         brightness: device.getBrightness(),
-        on: device.isOn(),
-        color: deviceSettings ? deviceSettings.getColor() : "#00ff00",
-        delay: deviceSettings ? deviceSettings.getSpeed() : 100
-    })
+        on: device.isOn()
+    }
+    if (deviceSettings) {
+        if (device.mode.configs.includes("color")) {
+            body.color = deviceSettings.getColor()
+        }
+        if (device.mode.configs.includes("randomColor")) {
+            body.randomColor = deviceSettings.getRandomColor()
+        }
+        if (device.mode.configs.includes("showSeconds")) {
+            body.showSeconds = deviceSettings.getShowSeconds()
+        }
+        if (device.mode.configs.includes("speed")) {
+            body.delay = deviceSettings.getSpeed()
+        }
+    }
+    return res.send(body)
 })
 
 module.exports = router

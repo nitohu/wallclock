@@ -10,7 +10,9 @@ const validModes = [
 
 const mode_config = [
     "color",
-    "speed"
+    "speed",
+    "randomColor",
+    "showSeconds"
 ]
 
 /**
@@ -36,11 +38,11 @@ class DeviceMode {
 }
 
 const modes = [
-    new DeviceMode("sclock", "Simple Clock", false),
+    new DeviceMode("sclock", "Simple Clock", true, ["showSeconds"]),
     new DeviceMode("gclock", "Gradient Clock", false),
     new DeviceMode("rainbow", "Color Rainbow", true, ["speed"]),
     new DeviceMode("static", "Static Color", true, ["color"]),
-    new DeviceMode("pulse", "Pulse", true, ["speed", "color"]),
+    new DeviceMode("pulse", "Pulse", true, ["speed", "color", "randomColor"]),
     new DeviceMode("fade", "Fade", true, ["speed"])
 ]
 

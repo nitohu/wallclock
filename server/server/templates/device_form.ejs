@@ -101,7 +101,7 @@
                     <% if (device && device.color) { %> value="<%= device.color %>" <% } %>
                     <% if (device && device.mode && device.mode.configs && !device.mode.configs.includes("color")) { %> style="visibility: hidden;" <% } %> />
                 <br />
-                <div class="slider-group" id="effectSpeedGroup"
+                <div class="slider-group mb-2" id="effectSpeedGroup"
                     <% if (device && device.mode && device.mode.configs && !device.mode.configs.includes("speed")) { %> 
                         style="visibility: hidden;"
                     <% } %>
@@ -113,6 +113,24 @@
                         <% } %> >
                     <span class="slider-min">0</span>
                     <span class="slider-max">1000</span>
+                </div>
+                <div id="randomColorGroup"
+                    <% if (device && !device.mode.configs.includes("randomColor")) { %>
+                        style="visibility: hidden;"
+                    <% } %>
+                >
+                    <input type="checkbox" name="randomColor" id="randomColor" class="form-check-input"
+                        <% if (device && device.getCurrentModeSettings().getRandomColor()) { %> checked <% } %> >
+                    <label for="randomColor" class="form-check-label">Random Color</label>
+                </div>
+                <div id="showSecondsGroup"
+                    <% if (device && !device.mode.configs.includes("showSeconds")) { %>
+                        style="visibility: hidden;"
+                    <% } %>
+                >
+                    <input type="checkbox" name="showSeconds" id="showSeconds" class="form-check-input"
+                        <% if (device && device.getCurrentModeSettings().getShowSeconds()) { %> checked <% } %> >
+                    <label for="showSeconds" class="form-check-label">Show Seconds</label>
                 </div>
             </div>
             <br />

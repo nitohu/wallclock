@@ -227,7 +227,8 @@ class Device {
         return this.#token
     }
 
-    async updateMode(mode, color, isOn, brightness, delay) {
+    // TODO: Can probably be improved by taking a dictionary for mode settings
+    async updateMode(mode, color, isOn, brightness, delay, randomColor, showSeconds) {
         if (this.#id < 1) throw new Error("Device has no id, cannot write to database.")
         if (!validModes.includes(mode)) throw new Error("Please provide a valid mode.")
 
@@ -247,6 +248,8 @@ class Device {
         const modeSettings = this.getCurrentModeSettings()
         modeSettings.setSpeed(delay)
         modeSettings.setColor(color)
+        modeSettings.setRandomColor(randomColor)
+        modeSettings.setShowSeconds(showSeconds)
         await modeSettings.write()
 
         this.mode = this.getMode()
@@ -268,6 +271,12 @@ class Device {
             const modeSettings = this.getCurrentModeSettings()
             if (this.mode.configs.includes("color")) {
                 data.color = modeSettings.getColor()
+            }
+            if (this.mode.configs.includes("randomColor")) {
+                data.randomColor = modeSettings.getRandomColor()
+            }
+            if (this.mode.configs.includes("showSeconds")) {
+                data.showSeconds = modeSettings.getShowSeconds()
             }
             if (this.mode.configs.includes("speed")) {
                 data.delay = modeSettings.getSpeed()
