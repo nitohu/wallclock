@@ -7,7 +7,7 @@ const { validModes } = require("./device_mode")
 class DeviceModeSettings {
     #deviceId = 0
     #name = ""
-    #speed = 100
+    #speed = 10
     #color = ""
     #randomColor = false
     #showSeconds = true
@@ -20,14 +20,18 @@ class DeviceModeSettings {
     }
 
     getName() { return this.#name }
-    getSpeed() { return this.#speed }
+    getSpeed() {
+        return Number.parseInt(this.#speed)
+    }
     getColor() { return this.#color }
     getRandomColor() { return this.#randomColor }
     getShowSeconds() { return this.#showSeconds }
 
     setSpeed(speed) {
-        // TODO: check for max & min speed/delay
-        this.#speed = speed
+        let s = Number.parseInt(speed)
+        if (s > 50) s = 50
+        else if (s < 0) s = 0
+        this.#speed = s
     }
     setColor(color) {
         // TODO: Add regex validating hex

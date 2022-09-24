@@ -21,8 +21,12 @@ unsigned short r = 255, g = 255, b = 255;
 bool is_on = true;
 // Brightness (0 -> 1)
 double brightness = 0.3;
-// Delay in ms (will be configurable)
+// Delay in ms (rainbow, pulse, fade config)
 unsigned long del = 10;
+// Clock config
+bool showSeconds = true;
+// Pulse config
+bool random_color = false;
 /**
  * Wifi stuff
  */
@@ -184,9 +188,6 @@ void loop() {
         delay(200);
         break;
     }
-    // TODO: should probably be moved into functions which have a configurable speed
-    // otherwise updating the del will have an effect on all modes
-    delay(del);
 }
 
 void process_message(JSONVar msg) {
@@ -265,6 +266,12 @@ void process_message(JSONVar msg) {
         is_on = (bool) msg["on"];
     }
     // TODO: Change delay
+    if (msg.hasOwnProperty("delay")) {
+        int d = (int) msg["delay"];
+        if (d > 50) d = 50;
+        else if (d < 0) d = 0;
+        del = d;
+    }
 }
 
 void turn_off() {
@@ -336,6 +343,7 @@ void fade_effect() {
     }
 
     updateLeds();
+    if (!receive_msg) delay(del);
 }
 
 // Pulses specified color
@@ -346,7 +354,7 @@ void pulse(short cr, short cg, short cb) {
         eff_brightness += 0.01;
         if (eff_brightness >= 0.99) {
             m = 1;
-            delay(100);
+            if (!receive_msg) delay(del*0.25);
         }
     }
     // LED gets darker
@@ -354,13 +362,14 @@ void pulse(short cr, short cg, short cb) {
         eff_brightness -= 0.01;
         if (eff_brightness <= 0.01) {
             m = 0;
-            delay(100);
+            if (!receive_msg) delay(del*0.25);
         }
     }
     eff_r = cr * eff_brightness;
     eff_g = cg * eff_brightness;
     eff_b = cb * eff_brightness;
     updateLeds();
+    if (!receive_msg) delay(del);
 }
 
 // Rainbow effect
@@ -394,6 +403,7 @@ void rainbow(bool rotate) {
     if (rotate) offset++;
     if (offset >= LED_COUNT) offset = 0;
     FastLED.show();
+    if (!receive_msg) delay(del);
 }
 
 // Shows specified color

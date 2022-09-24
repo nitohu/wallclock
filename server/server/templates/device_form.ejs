@@ -107,12 +107,12 @@
                     <% } %>
                 >
                     <label for="effectSpeed">Delay</label>
-                    <input type="range" name="effectSpeed" id="effectSpeed" class="form-range" step="1" min="0" max="1000"
+                    <input type="range" name="effectSpeed" id="effectSpeed" class="form-range" step="1" min="0" max="50"
                         <% if (device && device.mode && device.mode.configs && !device.mode.configs.includes("speed")) { %> 
                             value="<%= device.getCurrentModeSettings().getSpeed() %>"
                         <% } %> >
-                    <span class="slider-min">0</span>
-                    <span class="slider-max">1000</span>
+                    <span class="slider-min">fast</span>
+                    <span class="slider-max">slow</span>
                 </div>
                 <div id="randomColorGroup"
                     <% if (device && !device.mode.configs.includes("randomColor")) { %>
