@@ -1,3 +1,25 @@
+let mode_settings = [];
+
+// Get settings for each mode of current device
+(function () {
+    const id = new URLSearchParams(window.location.search).get("id")
+    const req = new XMLHttpRequest()
+
+    req.onreadystatechange = function() {
+        if (this.readyState === 4 && this.status === 200) {
+            mode_settings = JSON.parse(this.responseText)
+            console.log("Settings successfully loaded.")
+            console.log(mode_settings)
+        } else if (this.readyState === 4) {
+            console.warn(JSON.parse(this.responseText))
+        }
+    }
+
+    req.open("GET", `/api/getModeSettings?device_id=${id}`)
+    req.setRequestHeader("Content-Type", "application/json")
+    req.send()
+})()
+
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("generateToken").onclick = generateToken
 
@@ -35,14 +57,20 @@ function getCurrentMode() {
     if (sel.className.includes("configurable")) {
         let configs = [];
         sel.classList.forEach((e) => configs.push(e.split("-")[1]))
+        let settings = undefined
+        mode_settings.forEach((s) => {
+            if (s.name == sel.value) settings = s
+        })
         
         // TODO: add more configurations
         if (configs.includes("color")) {
+            if (settings) document.getElementById("currentColor").value = settings.color
             document.getElementById("currentColor").style.visibility = "visible"
         } else {
             document.getElementById("currentColor").style.visibility = "hidden"
         }
         if (configs.includes("speed")) {
+            if (settings) document.getElementById("effectSpeed").value = settings.speed
             document.getElementById("effectSpeedGroup").style.visibility = "visible"
         } else {
             document.getElementById("effectSpeedGroup").style.visibility = "hidden"

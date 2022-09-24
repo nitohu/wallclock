@@ -22,6 +22,8 @@ class DeviceModeSettings {
     getName() { return this.#name }
     getSpeed() { return this.#speed }
     getColor() { return this.#color }
+    getRandomColor() { return this.#randomColor }
+    getShowSeconds() { return this.#showSeconds }
 
     setSpeed(speed) {
         // TODO: check for max & min speed/delay
@@ -81,6 +83,28 @@ class DeviceModeSettings {
             throw new Error("No row was affected.")
         
         return r.rows[0]
+    }
+
+    static async GetSettings(device_id) {
+        if (device_id <= 0)
+            throw new Error("Device ID must be greater than 0")
+        
+        const q = "SELECT * FROM mode_settings WHERE device_id=$1"
+        let res = await db.query(q, [device_id])
+        if (!res)
+            throw new Error("Something bad happened")
+        
+        const settings = []
+        for (let i = 0; i < res.rowCount; i++) {
+            const row = res.rows[i]
+            const s = new DeviceModeSettings(row.name, row.deviceID)
+            s.#speed = row.speed
+            s.#color = row.color
+            s.#randomColor = row.random_color
+            s.#showSeconds = row.show_seconds
+            settings.push(s)
+        }
+        return settings
     }
 
 }

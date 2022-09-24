@@ -2,6 +2,7 @@ const express = require("express")
 const auth = require("../middleware/auth")
 const Device = require("../models/device")
 const logger = require("../logger")
+const { DeviceModeSettings } = require("../models/mode_settings")
 
 const router = express.Router()
 
@@ -66,6 +67,28 @@ router.post("/updateMode", auth, async (req, res) => {
     device.push()
 
     return res.send({success: `Mode was successfully updated to ${req.body.mode}.`})
+})
+
+router.get("/getModeSettings", auth, async (req, res) => {
+    let settings = undefined
+    try {
+        settings = await DeviceModeSettings.GetSettings(req.query.device_id)
+    } catch (e) {
+        logger.warn(e)
+        return res.status(400).send({error: e})
+    }
+    const data = []
+    for (let i = 0; i < settings.length; i++) {
+        const d = {
+            name: settings[i].getName(),
+            speed: settings[i].getSpeed(),
+            color: settings[i].getColor(),
+            randomColor: settings[i].getRandomColor(),
+            showSeconds: settings[i].getShowSeconds()
+        }
+        data.push(d)
+    }
+    res.send(data)
 })
 
 router.get("/currentTime", async (req, res) => {
