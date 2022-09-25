@@ -63,3 +63,7 @@ footer {
     float: right;
 }
 
+.device-card {
+    margin-right: 0.1em;
+    margin-left: 0.1em;
+}

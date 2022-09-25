@@ -64,8 +64,8 @@
         <input type="reset" class="btn btn-dark" value="Reset" />  
     </form>
     
+    <% if (device && device.mode) { %>
     <hr />
-    <!-- Toggle modes of clock (no need to always click on save) -->
     <div>
         <h3 class="mb-3">General Settings</h3>
         <div class="d-md-flex mb-3">
@@ -90,10 +90,13 @@
             </div>
         </div>
         <div class="ms-2">
-            <label for="cbrightness">Brightness</label>
-            <input type="range" name="cbrightness" id="cbrightness" class="form-range" step="0.1" min="0" max="100"
-                <% if (device) { %> value="<%= device.getBrightness() %>" <% } %> >
-            <br />
+            <div class="slider-group">
+                <label for="cbrightness">Brightness</label>
+                <input type="range" name="cbrightness" id="cbrightness" class="form-range" step="1" min="0" max="100"
+                    <% if (device) { %> value="<%= device.getBrightness() %>" <% } %> >
+                <span class="slider-min">dark</span>
+                <span class="slider-max">bright</span>
+            </div>
             <div class="mode-settings">
                 <h3 class="mb-3 mt-3">Mode settings</h3>
                 <!-- TODO: Add more configurables -->
@@ -115,7 +118,7 @@
                     <span class="slider-max">slow</span>
                 </div>
                 <div id="randomColorGroup"
-                    <% if (device && !device.mode.configs.includes("randomColor")) { %>
+                    <% if (device && device.mode && !device.mode.configs.includes("randomColor")) { %>
                         style="visibility: hidden;"
                     <% } %>
                 >
@@ -146,6 +149,7 @@
             <button class="btn btn-secondary btn-sm" id="updateMode">Update Mode</button>
         </div>
     </div>
+    <% } %>
 </div>
 
 

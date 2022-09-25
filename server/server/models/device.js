@@ -52,6 +52,8 @@ class Device {
                 return mode
             }
         }
+        // fallback if field in db is empty
+        if (modes.length > 0) return modes[0]
         return null
     }
     getColor() { return this.#color }
@@ -64,6 +66,8 @@ class Device {
         for (let i = 0; i < this.#settings.length; i++) {
             if (this.#settings[i].getName() == this.#mode) return this.#settings[i]
         }
+        if (this.#settings.length > 0) return this.#settings[0]
+        return undefined
     }
     isOn() { return this.#isOn }
 
@@ -133,8 +137,14 @@ class Device {
     async delete() {
         if (this.#id < 1)
             throw new Error("Device has no id, cannot delete from database.")
-        const q = "DELETE FROM device WHERE id=$1 RETURNING *"
+        // Delete settings
+        let q = "DELETE FROM mode_settings where device_id=$1"
         let r = await db.query(q, [this.#id])
+        if (!r)
+            throw new Error(`There was an error while deleting the mode settings of device ${this.#id}`)
+        // Delete device
+        q = "DELETE FROM device WHERE id=$1 RETURNING *"
+        r = await db.query(q, [this.#id])
         if (!r)
             throw new Error("An unexpected error occured")
         if (r.rowCount == 0)
