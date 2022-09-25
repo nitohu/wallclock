@@ -35,8 +35,10 @@ CREATE TABLE mode_settings (
     color text,
     -- Use random colors? (for pulse)
     random_color boolean,
-    -- Show seconds?
-    show_seconds boolean
+    -- Show seconds? (for simple clock)
+    show_seconds boolean,
+    -- Rotate? (for rainbow)
+    rotate boolean
 );
 
 COMMIT;

@@ -27,6 +27,8 @@ unsigned long del = 10;
 bool show_seconds = true;
 // Pulse config
 bool random_color = false;
+// Rainbow config
+bool rotate = true;
 /**
  * Wifi stuff
  */
@@ -169,7 +171,7 @@ void loop() {
         static_color(r, g, b);
         break;
     case MODE_RAINBOW:
-        rainbow(true);
+        rainbow(rotate);
         break;
     case MODE_PULSE:
         pulse(r, g, b);
@@ -274,7 +276,9 @@ void process_message(JSONVar msg) {
     if (msg.hasOwnProperty("randomColor")) {
         random_color = (bool) msg["randomColor"];
     }
-    // TODO: Add option if rainbow should be rotated or not
+    if (msg.hasOwnProperty("rotate")) {
+        rotate = (bool) msg["rotate"];
+    }
 }
 
 void turn_off() {
@@ -387,7 +391,7 @@ void pulse(short cr, short cg, short cb) {
 }
 
 // Rainbow effect
-void rainbow(bool rotate) {
+void rainbow(bool rot) {
     if (!is_on) {
         updateLeds();
         return;
@@ -414,7 +418,7 @@ void rainbow(bool rotate) {
         else
             leds[i+offset-LED_COUNT] = CRGB(eff_r*brightness, eff_g*brightness, eff_b*brightness);
     }
-    if (rotate) offset++;
+    if (rot) offset++;
     if (offset >= LED_COUNT) offset = 0;
     FastLED.show();
     if (!receive_msg) delay(del);

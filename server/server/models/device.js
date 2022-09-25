@@ -228,7 +228,7 @@ class Device {
     }
 
     // TODO: Can probably be improved by taking a dictionary for mode settings
-    async updateMode(mode, color, isOn, brightness, delay, randomColor, showSeconds) {
+    async updateMode(mode, color, isOn, brightness, delay, randomColor, showSeconds, rotate) {
         if (this.#id < 1) throw new Error("Device has no id, cannot write to database.")
         if (!validModes.includes(mode)) throw new Error("Please provide a valid mode.")
 
@@ -250,6 +250,7 @@ class Device {
         modeSettings.setColor(color)
         modeSettings.setRandomColor(randomColor)
         modeSettings.setShowSeconds(showSeconds)
+        modeSettings.setRotate(rotate)
         await modeSettings.write()
 
         this.mode = this.getMode()
@@ -280,6 +281,9 @@ class Device {
             }
             if (this.mode.configs.includes("speed")) {
                 data.delay = modeSettings.getSpeed()
+            }
+            if (this.mode.configs.includes("rotate")) {
+                data.rotate = modeSettings.getRotate()
             }
         }
         data = JSON.stringify(data)

@@ -132,6 +132,15 @@
                         <% if (device && device.getCurrentModeSettings().getShowSeconds()) { %> checked <% } %> >
                     <label for="showSeconds" class="form-check-label">Show Seconds</label>
                 </div>
+                <div id="rotateGroup"
+                    <% if (device && !device.mode.configs.includes("rotate")) { %>
+                        style="visibility: hidden;"
+                    <% } %>
+                >
+                    <input type="checkbox" name="rotate" id="rotate" class="form-check-input"
+                        <% if (device && device.getCurrentModeSettings().getRotate()) { %> checked <% } %> >
+                    <label for="rotate" class="form-check-label">Rotate</label>
+                </div>
             </div>
             <br />
             <button class="btn btn-secondary btn-sm" id="updateMode">Update Mode</button>

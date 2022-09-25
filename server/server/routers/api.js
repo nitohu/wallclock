@@ -65,7 +65,8 @@ router.post("/updateMode", auth, async (req, res) => {
             req.body.brightness,
             req.body.speed,
             req.body.randomColor,
-            req.body.showSeconds)
+            req.body.showSeconds,
+            req.body.rotate)
     } catch (e) {
         console.log(e)
         return res.status(400).send({error: e})
@@ -91,7 +92,8 @@ router.get("/getModeSettings", auth, async (req, res) => {
             speed: settings[i].getSpeed(),
             color: settings[i].getColor(),
             randomColor: settings[i].getRandomColor(),
-            showSeconds: settings[i].getShowSeconds()
+            showSeconds: settings[i].getShowSeconds(),
+            rotate: settings[i].getRotate()
         }
         data.push(d)
     }
@@ -139,6 +141,9 @@ router.post("/config", async (req, res) => {
         }
         if (device.mode.configs.includes("speed")) {
             body.delay = deviceSettings.getSpeed()
+        }
+        if (device.mode.configs.includes("rotate")) {
+            body.rotate = deviceSettings.getRotate()
         }
     }
     return res.send(body)

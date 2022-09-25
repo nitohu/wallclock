@@ -12,7 +12,8 @@ const mode_config = [
     "color",
     "speed",
     "randomColor",
-    "showSeconds"
+    "showSeconds",
+    "rotate"
 ]
 
 /**
@@ -40,7 +41,7 @@ class DeviceMode {
 const modes = [
     new DeviceMode("sclock", "Simple Clock", true, ["showSeconds"]),
     new DeviceMode("gclock", "Gradient Clock", false),
-    new DeviceMode("rainbow", "Color Rainbow", true, ["speed"]),
+    new DeviceMode("rainbow", "Color Rainbow", true, ["speed", "rotate"]),
     new DeviceMode("static", "Static Color", true, ["color"]),
     new DeviceMode("pulse", "Pulse", true, ["speed", "color", "randomColor"]),
     new DeviceMode("fade", "Fade", true, ["speed"])

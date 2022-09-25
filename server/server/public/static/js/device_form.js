@@ -74,11 +74,19 @@ function getCurrentMode() {
         } else {
             document.getElementById("randomColorGroup").style.visibility = "hidden"
         }
+        if (configs.includes("rotate")) {
+            if (settings && settings.rotate) document.getElementById("rotate").checked = true
+            else document.getElementById("rotate").checked = false
+            document.getElementById("rotateGroup").style.visibility = "visible"
+        } else {
+            document.getElementById("rotateGroup").style.visibility = "hidden"
+        }
     } else {
         document.getElementById("currentColor").style.visibility = "hidden"
         document.getElementById("effectSpeedGroup").style.visibility = "hidden"
         document.getElementById("showSecondsGroup").style.visibility = "hidden"
         document.getElementById("randomColorGroup").style.visibility = "hidden"
+        document.getElementById("rotateGroup").style.visibility = "hidden"
     }
 }
 
@@ -121,7 +129,8 @@ function updateCurrentMode() {
         brightness: document.getElementById("cbrightness").value,
         speed: document.getElementById("effectSpeed").value,
         randomColor: document.getElementById("randomColor").checked,
-        showSeconds: document.getElementById("showSeconds").checked
+        showSeconds: document.getElementById("showSeconds").checked,
+        rotate: document.getElementById("rotate").checked
     }
 
     req.onreadystatechange = function() {
