@@ -24,7 +24,7 @@ double brightness = 0.3;
 // Delay in ms (rainbow, pulse, fade config)
 unsigned long del = 10;
 // Clock config
-bool showSeconds = true;
+bool show_seconds = true;
 // Pulse config
 bool random_color = false;
 /**
@@ -191,26 +191,20 @@ void loop() {
 }
 
 void process_message(JSONVar msg) {
+    // TODO: probably need some more error checking so clock doesn't crash w/ unexpected values
     // Switch mode
     if (msg.hasOwnProperty("mode")) {
         const char* mode = (const char*) msg["mode"];
         
         if (strcmp(mode, "static") == 0) {
             current_effect = MODE_STATIC;
-            if (msg.hasOwnProperty("color")) {
-                // TODO: parse & set color
-            }
         } else if (strcmp(mode, "rainbow") == 0) {
             current_effect = MODE_RAINBOW;
-            // TODO: Add option if rainbow should be rotated or not
         } else if (strcmp(mode, "pulse") == 0) {
             // Reset effect specific settings
             eff_brightness = 0;
             m = 0;
             current_effect = MODE_PULSE;
-            if (msg.hasOwnProperty("color")) {
-                // TODO: parse & set color
-            }
         } else if (strcmp(mode, "fade") == 0) {
             // Reset effect colors, effect always starts with red
             eff_r = 0; eff_g = 0; eff_b = 0;
@@ -263,15 +257,24 @@ void process_message(JSONVar msg) {
     }
     // Set on/off
     if (msg.hasOwnProperty("on")) {
+        // TODO: probably need some more error checking so clock doesn't crash w/ unexpected values
         is_on = (bool) msg["on"];
     }
-    // TODO: Change delay
+    // Change delay
     if (msg.hasOwnProperty("delay")) {
         int d = (int) msg["delay"];
         if (d > 50) d = 50;
         else if (d < 0) d = 0;
         del = d;
     }
+    if (msg.hasOwnProperty("showSeconds")) {
+        // TODO: probably need some more error checking so clock doesn't crash w/ unexpected values
+        show_seconds = (bool) msg["showSeconds"];
+    }
+    if (msg.hasOwnProperty("randomColor")) {
+        random_color = (bool) msg["randomColor"];
+    }
+    // TODO: Add option if rainbow should be rotated or not
 }
 
 void turn_off() {
@@ -363,11 +366,22 @@ void pulse(short cr, short cg, short cb) {
         if (eff_brightness <= 0.01) {
             m = 0;
             if (!receive_msg) delay(del*0.25);
+            if (random_color) {
+                r = random(0, 256);
+                g = random(0, 256);
+                b = random(0, 256);
+            }
         }
     }
-    eff_r = cr * eff_brightness;
-    eff_g = cg * eff_brightness;
-    eff_b = cb * eff_brightness;
+    if (random_color) {
+        eff_r = r * eff_brightness;
+        eff_g = g * eff_brightness;
+        eff_b = b * eff_brightness;
+    } else {
+        eff_r = cr * eff_brightness;
+        eff_g = cg * eff_brightness;
+        eff_b = cb * eff_brightness;
+    }
     updateLeds();
     if (!receive_msg) delay(del);
 }
@@ -425,20 +439,24 @@ void clock_simple() {
     // Problem: Due to the delay between server taking timestamp & client receiving the request the time will be a little bit in the past
     int h_led = getHoursLED(), m_led = getMinutesLED(), s_led = getSecondsLED();
     for (int i = 0; i < LED_COUNT; i++) {
+        int h_c = 0, m_c = 0, s_c = 0;
         // hour
         if (i == h_led || i == (h_led+1)) {
-            leds[i] = CRGB(255*brightness, 0, 0);
+            // leds[i] = CRGB(255*brightness, 0, 0);
+            h_c = 255 * brightness;
         }
         // minute
-        else if (i == m_led || i == (m_led+1)) {
-            leds[i] = CRGB(0, 255*brightness, 0);
+        if (i == m_led || i == (m_led+1)) {
+            // leds[i] = CRGB(0, 255*brightness, 0);
+            m_c = 255 * brightness;
         }
         // second
-        else if (i == s_led || i == (s_led+1)) {
-            leds[i] = CRGB(0, 0, 255*brightness);
+        if ((i == s_led || i == (s_led+1)) && show_seconds) {
+            // leds[i] = CRGB(0, 0, 255*brightness);
+            s_c = 255 * brightness;
         }
         // everything else off
-        else leds[i] = CRGB(0, 0, 0);
+        leds[i] = CRGB(h_c, m_c, s_c);
     }
     FastLED.show();
 }
@@ -452,11 +470,11 @@ void clock_gradient() {
     int ch = getHoursLED(), cm = getMinutesLED();
     // Draw from hour to minute
     for (int i = ch; i < (LED_COUNT*2) && (i%LED_COUNT) != cm; i++) {
-        leds[i%LED_COUNT] = CRGB(255, 0, 0);
+        leds[i%LED_COUNT] = CRGB(255, 0, 0) * brightness;
     }
     // Draw from minute to hour
     for (int i = cm; i < (LED_COUNT*2) && (i%LED_COUNT) != ch; i++) {
-        leds[i%LED_COUNT] = CRGB(0, 255, 0);
+        leds[i%LED_COUNT] = CRGB(0, 255, 0) * brightness;
     }
     FastLED.show();
 }
