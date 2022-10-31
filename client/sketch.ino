@@ -474,11 +474,11 @@ void clock_gradient() {
     int ch = getHoursLED(), cm = getMinutesLED();
     // Draw from hour to minute
     for (int i = ch; i < (LED_COUNT*2) && (i%LED_COUNT) != cm; i++) {
-        leds[i%LED_COUNT] = CRGB(255, 0, 0) * brightness;
+        leds[i%LED_COUNT] = CRGB(255 * brightness, 0, 0);
     }
     // Draw from minute to hour
     for (int i = cm; i < (LED_COUNT*2) && (i%LED_COUNT) != ch; i++) {
-        leds[i%LED_COUNT] = CRGB(0, 255, 0) * brightness;
+        leds[i%LED_COUNT] = CRGB(0, 255 * brightness, 0);
     }
     FastLED.show();
 }
