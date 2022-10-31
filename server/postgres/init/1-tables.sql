@@ -33,12 +33,20 @@ CREATE TABLE mode_settings (
     speed integer,
     -- Effect color (hex)
     color text,
+    -- Effect color 2 (hex)
+    color2 text,
+    -- Effect color 3 (hex)
+    color3 text,
+    -- Effect color 4 (hex)
+    color4 text,
     -- Use random colors? (for pulse)
     random_color boolean,
     -- Show seconds? (for simple clock)
     show_seconds boolean,
     -- Rotate? (for rainbow)
-    rotate boolean
+    rotate boolean,
+    -- Use Gradient? (for gradient clock)
+    use_gradient boolean
 );
 
 COMMIT;

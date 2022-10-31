@@ -160,17 +160,7 @@ class Device {
         // NOTE: Can be put in a static function in ModeSettings ().FetchSettings(device_id))
         if (this.#id <= 0)
             throw new Error("Invalid ID.")
-        this.#settings = []
-        const r = await db.query("SELECT * FROM mode_settings WHERE device_id=$1", [this.#id])
-        for (let i = 0; i < r.rowCount; i++) {
-            const m = r.rows[i]
-            let t = new DeviceModeSettings(m.name, m.device_id)
-            t.setSpeed(m.speed)
-            t.setColor(m.color)
-            t.setRandomColor(m.random_color)
-            t.setShowSeconds(m.show_seconds)
-            this.#settings.push(t)
-        }
+        this.#settings = await DeviceModeSettings.GetSettings(this.#id)
     }
 
     // FindByID
@@ -238,7 +228,7 @@ class Device {
     }
 
     // TODO: Can probably be improved by taking a dictionary for mode settings
-    async updateMode(mode, color, isOn, brightness, delay, randomColor, showSeconds, rotate) {
+    async updateMode(mode, color, color2, color3, color4, isOn, brightness, delay, randomColor, showSeconds, rotate, useGradient) {
         if (this.#id < 1) throw new Error("Device has no id, cannot write to database.")
         if (!validModes.includes(mode)) throw new Error("Please provide a valid mode.")
 
@@ -258,9 +248,13 @@ class Device {
         const modeSettings = this.getCurrentModeSettings()
         modeSettings.setSpeed(delay)
         modeSettings.setColor(color)
+        modeSettings.setColor2(color2)
+        modeSettings.setColor3(color3)
+        modeSettings.setColor4(color4)
         modeSettings.setRandomColor(randomColor)
         modeSettings.setShowSeconds(showSeconds)
         modeSettings.setRotate(rotate)
+        modeSettings.setUseGradient(useGradient)
         await modeSettings.write()
 
         this.mode = this.getMode()
@@ -283,6 +277,15 @@ class Device {
             if (this.mode.configs.includes("color")) {
                 data.color = modeSettings.getColor()
             }
+            if (this.mode.configs.includes("color2")) {
+                data.color2 = modeSettings.getColor2()
+            }
+            if (this.mode.configs.includes("color3")) {
+                data.color3 = modeSettings.getColor3()
+            }
+            if (this.mode.configs.includes("color4")) {
+                data.color4 = modeSettings.getColor4()
+            }
             if (this.mode.configs.includes("randomColor")) {
                 data.randomColor = modeSettings.getRandomColor()
             }
@@ -294,6 +297,9 @@ class Device {
             }
             if (this.mode.configs.includes("rotate")) {
                 data.rotate = modeSettings.getRotate()
+            }
+            if (this.mode.configs.includes("useGradient")) {
+                data.useGradient = modeSettings.getUseGradient()
             }
         }
         data = JSON.stringify(data)

@@ -61,12 +61,16 @@ router.post("/updateMode", auth, async (req, res) => {
         await device.updateMode(
             req.body.mode,
             req.body.color,
+            req.body.color2,
+            req.body.color3,
+            req.body.color4,
             req.body.on,
             req.body.brightness,
             req.body.speed,
             req.body.randomColor,
             req.body.showSeconds,
-            req.body.rotate)
+            req.body.rotate,
+            req.body.useGradient)
     } catch (e) {
         console.log(e)
         return res.status(400).send({error: e})
@@ -91,9 +95,13 @@ router.get("/getModeSettings", auth, async (req, res) => {
             name: settings[i].getName(),
             speed: settings[i].getSpeed(),
             color: settings[i].getColor(),
+            color2: settings[i].getColor2(),
+            color3: settings[i].getColor3(),
+            color4: settings[i].getColor4(),
             randomColor: settings[i].getRandomColor(),
             showSeconds: settings[i].getShowSeconds(),
-            rotate: settings[i].getRotate()
+            rotate: settings[i].getRotate(),
+            useGradient: settings[i].getUseGradient()
         }
         data.push(d)
     }

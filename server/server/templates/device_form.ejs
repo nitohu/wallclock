@@ -92,7 +92,7 @@
         <div class="ms-2">
             <div class="slider-group">
                 <label for="cbrightness">Brightness</label>
-                <input type="range" name="cbrightness" id="cbrightness" class="form-range" step="1" min="0" max="100"
+                <input type="range" name="cbrightness" id="cbrightness" class="form-range" step="1" min="1" max="100"
                     <% if (device) { %> value="<%= device.getBrightness() %>" <% } %> >
                 <span class="slider-min">dark</span>
                 <span class="slider-max">bright</span>
@@ -100,17 +100,38 @@
             <div class="mode-settings">
                 <h3 class="mb-3 mt-3">Mode settings</h3>
                 <!-- TODO: Add more configurables -->
-                <input type="color" name="currentColor" id="currentColor" class="form-control color-control"
-                    <% if (device && device.color) { %> value="<%= device.color %>" <% } %>
-                    <% if (device && device.mode && device.mode.configs && !device.mode.configs.includes("color")) { %> style="visibility: hidden;" <% } %> />
-                <br />
+                <div id="colorGroup"
+                    <% if (device && device.mode && device.mode.configs && !device.mode.configs.includes("color")) { %> style="display: none;" <% } %> >
+                    <input type="color" name="color" id="color" class="form-control color-control"
+                        <% if (device && device.getCurrentModeSettings().getColor()) { %> value="<%= device.getCurrentModeSettings().getColor() %>" <% } %> />
+                    <br />
+                </div>
+                <div id="color2Group"
+                    <% if (device && device.mode && device.mode.configs && !device.mode.configs.includes("color2")) { %> style="display: none;" <% } %> 
+                >
+                    <input type="color" name="color2" id="color2" class="form-control color-control"
+                        <% if (device && device.getCurrentModeSettings().getColor2()) { %> value="<%= device.getCurrentModeSettings().getColor2() %>" <% } %> />
+                    <br />
+                </div>
+                <div id="color3Group"
+                    <% if (device && device.mode && device.mode.configs && !device.mode.configs.includes("color3")) { %> style="display: none;" <% } %>>
+                    <input type="color" name="color3" id="color3" class="form-control color-control"
+                        <% if (device && device.getCurrentModeSettings().getColor3()) { %> value="<%= device.getCurrentModeSettings().getColor3() %>" <% } %> />
+                    <br />
+                </div>
+                <div id="color4Group"
+                    <% if (device && device.mode && device.mode.configs && !device.mode.configs.includes("color4")) { %> style="display: none;" <% } %>>
+                    <input type="color" name="color4" id="color4" class="form-control color-control"
+                        <% if (device && device.getCurrentModeSettings().getColor4()) { %> value="<%= device.getCurrentModeSettings().getColor4() %>" <% } %> />
+                    <br />
+                </div>
                 <div class="slider-group mb-2" id="effectSpeedGroup"
                     <% if (device && device.mode && device.mode.configs && !device.mode.configs.includes("speed")) { %> 
-                        style="visibility: hidden;"
+                        style="display: none;"
                     <% } %>
                 >
                     <label for="effectSpeed">Delay</label>
-                    <input type="range" name="effectSpeed" id="effectSpeed" class="form-range" step="1" min="0" max="50"
+                    <input type="range" name="effectSpeed" id="speed" class="form-range" step="1" min="0" max="50"
                         <% if (device && device.mode && device.mode.configs && !device.mode.configs.includes("speed")) { %> 
                             value="<%= device.getCurrentModeSettings().getSpeed() %>"
                         <% } %> >
@@ -119,7 +140,7 @@
                 </div>
                 <div id="randomColorGroup"
                     <% if (device && device.mode && !device.mode.configs.includes("randomColor")) { %>
-                        style="visibility: hidden;"
+                        style="display: none;"
                     <% } %>
                 >
                     <input type="checkbox" name="randomColor" id="randomColor" class="form-check-input"
@@ -128,7 +149,7 @@
                 </div>
                 <div id="showSecondsGroup"
                     <% if (device && !device.mode.configs.includes("showSeconds")) { %>
-                        style="visibility: hidden;"
+                        style="display: none;"
                     <% } %>
                 >
                     <input type="checkbox" name="showSeconds" id="showSeconds" class="form-check-input"
@@ -137,12 +158,21 @@
                 </div>
                 <div id="rotateGroup"
                     <% if (device && !device.mode.configs.includes("rotate")) { %>
-                        style="visibility: hidden;"
+                        style="display: none;"
                     <% } %>
                 >
                     <input type="checkbox" name="rotate" id="rotate" class="form-check-input"
                         <% if (device && device.getCurrentModeSettings().getRotate()) { %> checked <% } %> >
                     <label for="rotate" class="form-check-label">Rotate</label>
+                </div>
+                <div id="useGradientGroup"
+                    <% if (device && !device.mode.configs.includes("useGradient")) { %>
+                        style="display: none;"
+                    <% } %>
+                >
+                    <input type="checkbox" name="useGradient" id="useGradient" class="form-check-input"
+                        <% if (device && device.getCurrentModeSettings().getUseGradient()) { %> checked <% } %> >
+                    <label for="useGradient" class="form-check-label">Use Gradient colors</label>
                 </div>
             </div>
             <br />

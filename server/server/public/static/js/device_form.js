@@ -36,6 +36,27 @@ function generateToken() {
     req.send()
 }
 
+function updateBoolConfigField(configs, settings, curr_conf, cssClass) {
+    if (configs.includes(curr_conf)) {
+        if (settings && settings[curr_conf]) document.getElementById(curr_conf).checked = true
+        else document.getElementById(curr_conf).checked = false
+
+        document.getElementById(cssClass).style.display = "block"
+    } else {
+        document.getElementById(cssClass).style.display = "none"
+    }
+}
+
+function updateTextConfigField(configs, settings, curr_conf, val, cssClass) {
+    if (configs.includes(curr_conf)) {
+        if (settings) document.getElementById(curr_conf).value = val
+
+        document.getElementById(cssClass).style.display = "block"
+    } else {
+        document.getElementById(cssClass).style.display = "none"
+    }
+}
+
 function getCurrentMode() {
     const self = document.getElementById("currentModeSelector") 
     const sel = self.options[self.selectedIndex]
@@ -48,45 +69,21 @@ function getCurrentMode() {
         })
         
         // TODO: add more configurations
-        if (configs.includes("color")) {
-            if (settings) document.getElementById("currentColor").value = settings.color
-            document.getElementById("currentColor").style.visibility = "visible"
-        } else {
-            document.getElementById("currentColor").style.visibility = "hidden"
-        }
-        if (configs.includes("showSeconds")) {
-            if (settings && settings.showSeconds) document.getElementById("showSeconds").checked = true
-            else document.getElementById("showSeconds").checked = false
-            document.getElementById("showSecondsGroup").style.visibility = "visible"
-        } else {
-            document.getElementById("showSecondsGroup").style.visibility = "hidden"
-        }
-        if (configs.includes("speed")) {
-            if (settings) document.getElementById("effectSpeed").value = settings.speed
-            document.getElementById("effectSpeedGroup").style.visibility = "visible"
-        } else {
-            document.getElementById("effectSpeedGroup").style.visibility = "hidden"
-        }
-        if (configs.includes("randomColor")) {
-            if (settings && settings.randomColor) document.getElementById("randomColor").checked = true
-            else document.getElementById("randomColor").checked = false
-            document.getElementById("randomColorGroup").style.visibility = "visible"
-        } else {
-            document.getElementById("randomColorGroup").style.visibility = "hidden"
-        }
-        if (configs.includes("rotate")) {
-            if (settings && settings.rotate) document.getElementById("rotate").checked = true
-            else document.getElementById("rotate").checked = false
-            document.getElementById("rotateGroup").style.visibility = "visible"
-        } else {
-            document.getElementById("rotateGroup").style.visibility = "hidden"
-        }
+        updateTextConfigField(configs, settings, "color", settings.color, "colorGroup")
+        updateTextConfigField(configs, settings, "color2", settings.color2, "color2Group")
+        updateTextConfigField(configs, settings, "color3", settings.color3, "color3Group")
+        updateTextConfigField(configs, settings, "color4", settings.color4, "color4Group")
+        updateBoolConfigField(configs, settings, "showSeconds", "showSecondsGroup")
+        updateTextConfigField(configs, settings, "speed", settings.color, "effectSpeedGroup")
+        updateBoolConfigField(configs, settings, "randomColor", "randomColorGroup")
+        updateBoolConfigField(configs, settings, "rotate", "rotateGroup")
+        updateBoolConfigField(configs, settings, "useGradient", "useGradientGroup")
     } else {
-        document.getElementById("currentColor").style.visibility = "hidden"
-        document.getElementById("effectSpeedGroup").style.visibility = "hidden"
-        document.getElementById("showSecondsGroup").style.visibility = "hidden"
-        document.getElementById("randomColorGroup").style.visibility = "hidden"
-        document.getElementById("rotateGroup").style.visibility = "hidden"
+        document.getElementById("currentColor").style.display = "hidden"
+        document.getElementById("effectSpeedGroup").style.display = "hidden"
+        document.getElementById("showSecondsGroup").style.display = "hidden"
+        document.getElementById("randomColorGroup").style.display = "hidden"
+        document.getElementById("rotateGroup").style.display = "hidden"
     }
 }
 
@@ -123,14 +120,18 @@ function updateCurrentMode() {
     const req = new XMLHttpRequest()
     const body = {
         id,
-        color: document.getElementById("currentColor").value,
+        color: document.getElementById("color").value,
+        color2: document.getElementById("color2").value,
+        color3: document.getElementById("color3").value,
+        color4: document.getElementById("color4").value,
         mode: document.getElementById("currentModeSelector").value,
         on: isOn(),
         brightness: document.getElementById("cbrightness").value,
-        speed: document.getElementById("effectSpeed").value,
+        speed: document.getElementById("speed").value,
         randomColor: document.getElementById("randomColor").checked,
         showSeconds: document.getElementById("showSeconds").checked,
-        rotate: document.getElementById("rotate").checked
+        rotate: document.getElementById("rotate").checked,
+        useGradient: document.getElementById("useGradient").checked
     }
 
     req.onreadystatechange = function() {
