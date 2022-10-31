@@ -141,6 +141,15 @@ router.post("/config", async (req, res) => {
         if (device.mode.configs.includes("color")) {
             body.color = deviceSettings.getColor()
         }
+        if (device.mode.configs.includes("color2")) {
+            body.color2 = deviceSettings.getColor2()
+        }
+        if (device.mode.configs.includes("color3")) {
+            body.color3 = deviceSettings.getColor3()
+        }
+        if (device.mode.configs.includes("color4")) {
+            body.color4 = deviceSettings.getColor4()
+        }
         if (device.mode.configs.includes("randomColor")) {
             body.randomColor = deviceSettings.getRandomColor()
         }
@@ -152,6 +161,9 @@ router.post("/config", async (req, res) => {
         }
         if (device.mode.configs.includes("rotate")) {
             body.rotate = deviceSettings.getRotate()
+        }
+        if (device.mode.configs.includes("useGradient")) {
+            body.useGradient = deviceSettings.getUseGradient()
         }
     }
     return res.send(body)
