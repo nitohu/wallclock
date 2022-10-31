@@ -22,6 +22,10 @@ enum modes {
 } current_effect;
 // Color settings, will not be modified by functions using different colors, will only be overwritten by request/response
 Color color_settings{255, 255, 255};
+// Secondary, tertiary & Quaternary color settings
+Color colorSec_settings{255, 0, 0};
+Color colorTer_settings{0, 255, 0};
+Color colorQua_settings{0, 0, 255};
 bool is_on = true;
 // Brightness (0 -> 1)
 double brightness = 0.3;
@@ -33,6 +37,8 @@ bool show_seconds = true;
 bool random_color = false;
 // Rainbow config
 bool rotate = true;
+// Gradient clock config
+bool use_gradient = false;
 /**
  * Wifi stuff
  */
@@ -54,6 +60,7 @@ double eff_brightness = brightness;
 unsigned short m = 0;
 short offset = 0;
 
+Color process_color(const char* color_code);
 void process_message(JSONVar msg);
 void updateLeds();
 void turn_off();
@@ -198,6 +205,31 @@ void loop() {
     }
 }
 
+Color process_color(const char* color_code) {
+    Color c{0, 0, 0};
+    // Parse hex string into RGB values
+    if (*color_code == '#' && strlen(color_code) == 7) {
+        char hex_red[3], hex_green[3], hex_blue[3];
+        // Split color string into it's component (r/g/b) strings
+        for (short i = 1; i < strlen(color_code); i++) {
+            if ((i-1) < 2) hex_red[i-1] = *(color_code+i);
+            else if ((i-1) < 4) hex_green[i-3] = *(color_code+i);
+            else hex_blue[i-5] = *(color_code+i);
+        }
+        // Add string termination to char arrays (prevent overflow)
+        hex_red[2] = '\0';
+        hex_green[2] = '\0';
+        hex_blue[2] = '\0';
+        // Convert hex values into decimal
+        c.r = (int) strtol(hex_red, nullptr, 16);
+        c.g = (int) strtol(hex_green, nullptr, 16);
+        c.b = (int) strtol(hex_blue, nullptr, 16);
+    } else {
+        Serial.printf("Error: No valid color format received, need hex: %s (%d)\n", color_code, strlen(color_code));
+    }
+    return c;
+}
+
 void process_message(JSONVar msg) {
     // TODO: probably need some more error checking so clock doesn't crash w/ unexpected values
     // Switch mode
@@ -231,25 +263,22 @@ void process_message(JSONVar msg) {
     if (msg.hasOwnProperty("color")) {
         const char* color = (const char*) msg["color"];
         // Parse hex string into RGB values
-        if (*color == '#' && strlen(color) == 7) {
-            char hex_red[3], hex_green[3], hex_blue[3];
-            // Split color string into it's component (r/g/b) strings
-            for (short i = 1; i < strlen(color); i++) {
-                if ((i-1) < 2) hex_red[i-1] = *(color+i);
-                else if ((i-1) < 4) hex_green[i-3] = *(color+i);
-                else hex_blue[i-5] = *(color+i);
-            }
-            // Add string termination to char arrays (prevent overflow)
-            hex_red[2] = '\0';
-            hex_green[2] = '\0';
-            hex_blue[2] = '\0';
-            // Convert hex values into decimal
-            color_settings.r = (int) strtol(hex_red, nullptr, 16);
-            color_settings.g = (int) strtol(hex_green, nullptr, 16);
-            color_settings.b = (int) strtol(hex_blue, nullptr, 16);
-        } else {
-            Serial.printf("Error: No valid color format received, need hex: %s (%d)\n", color, strlen(color));
-        }
+        color_settings = process_color(color);
+    }
+    if (msg.hasOwnProperty("color2")) {
+        const char* color = (const char*) msg["color2"];
+        // Parse hex string into RGB values
+        colorSec_settings = process_color(color);
+    }
+    if (msg.hasOwnProperty("color3")) {
+        const char* color = (const char*) msg["color3"];
+        // Parse hex string into RGB values
+        colorTer_settings = process_color(color);
+    }
+    if (msg.hasOwnProperty("color4")) {
+        const char* color = (const char*) msg["color4"];
+        // Parse hex string into RGB values
+        colorQua_settings = process_color(color);
     }
     // Set time
     if (msg.hasOwnProperty("timestamp")) {
@@ -284,6 +313,9 @@ void process_message(JSONVar msg) {
     }
     if (msg.hasOwnProperty("rotate")) {
         rotate = (bool) msg["rotate"];
+    }
+    if (msg.hasOwnProperty("useGradient")) {
+        use_gradient = (bool) msg["useGradient"];
     }
 }
 
@@ -449,24 +481,34 @@ void clock_simple() {
     // Problem: Due to the delay between server taking timestamp & client receiving the request the time will be a little bit in the past
     int h_led = getHoursLED(), m_led = getMinutesLED(), s_led = getSecondsLED();
     for (int i = 0; i < LED_COUNT; i++) {
-        int h_c = 0, m_c = 0, s_c = 0;
+        int r = 0, g = 0, b = 0, j = 0;
         // hour
         if (i == h_led || i == (h_led+1)) {
-            // leds[i] = CRGB(255*brightness, 0, 0);
-            h_c = 255 * brightness;
+            r = color_settings.r;
+            g = color_settings.g;
+            b = color_settings.b;
+            j++;
         }
         // minute
         if (i == m_led || i == (m_led+1)) {
-            // leds[i] = CRGB(0, 255*brightness, 0);
-            m_c = 255 * brightness;
+            r += colorSec_settings.r;
+            g += colorSec_settings.g;
+            b += colorSec_settings.b;
+            j++;
         }
         // second
         if ((i == s_led || i == (s_led+1)) && show_seconds) {
-            // leds[i] = CRGB(0, 0, 255*brightness);
-            s_c = 255 * brightness;
+            r += colorTer_settings.r;
+            g += colorTer_settings.g;
+            b += colorTer_settings.b;
+            j++;
         }
-        // everything else off
-        leds[i] = CRGB(h_c, m_c, s_c);
+        if (j > 0) {
+            r /= j;
+            g /= j;
+            b /= j;
+        }
+        leds[i] = CRGB(r, g, b);
     }
     FastLED.show();
 }
@@ -478,13 +520,29 @@ void clock_gradient() {
         return;
     }
     int ch = getHoursLED(), cm = getMinutesLED();
+    // Wrong factor, must be calculated for each gradient w/ number of leds
+    short count_hour_minute = (LED_COUNT - ch + cm) % LED_COUNT;
+    // (LED_COUNT - cm + ch) % LED_COUNT
+    short count_minute_hour = LED_COUNT - count_hour_minute;
+    color_effect = color_settings;
     // Draw from hour to minute
     for (int i = ch; i < (LED_COUNT*2) && (i%LED_COUNT) != cm; i++) {
-        leds[i%LED_COUNT] = CRGB(255 * brightness, 0, 0);
+        leds[i%LED_COUNT] = CRGB(color_effect.r * brightness, color_effect.g * brightness, color_effect.b * brightness);
+        if (use_gradient) {
+            color_effect.r += (colorSec_settings.r - color_settings.r) / count_hour_minute;
+            color_effect.g += (colorSec_settings.g - color_settings.g) / count_hour_minute;
+            color_effect.b += (colorSec_settings.b - color_settings.b) / count_hour_minute;
+        }
     }
+    color_effect = colorTer_settings;
     // Draw from minute to hour
     for (int i = cm; i < (LED_COUNT*2) && (i%LED_COUNT) != ch; i++) {
-        leds[i%LED_COUNT] = CRGB(0, 255 * brightness, 0);
+        leds[i%LED_COUNT] = CRGB(color_effect.r * brightness, color_effect.g * brightness, color_effect.b * brightness);
+        if (use_gradient) {
+            color_effect.r += (colorQua_settings.r - colorTer_settings.r) / count_minute_hour;
+            color_effect.g += (colorQua_settings.g - colorTer_settings.g) / count_minute_hour;
+            color_effect.b += (colorQua_settings.b - colorTer_settings.b) / count_minute_hour;
+        }
     }
     FastLED.show();
 }
