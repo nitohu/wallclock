@@ -8,6 +8,10 @@
 
 CRGB leds[LED_COUNT];
 
+struct Color {
+    unsigned short r, g, b;
+};
+
 /**
  * Settings 
  * 
@@ -17,7 +21,7 @@ enum modes {
     MODE_CLOCK_SIMPLE, MODE_CLOCK_GRADIENT
 } current_effect;
 // Color settings, will not be modified by functions using different colors, will only be overwritten by request/response
-unsigned short r = 255, g = 255, b = 255;
+Color color_settings{255, 255, 255};
 bool is_on = true;
 // Brightness (0 -> 1)
 double brightness = 0.3;
@@ -44,7 +48,7 @@ bool cnfg_received = false;
  * 
  */
 // Current colors used in effect, can be manipulated by effects changing colors & reset between changing modes
-unsigned short eff_r = r, eff_g = g, eff_b = b;
+Color color_effect{255, 255, 255};
 double eff_brightness = brightness;
 // Mode (will be necessary for some effects)
 unsigned short m = 0;
@@ -60,9 +64,9 @@ int getSecondsLED();
 
 // Effects
 void fade_effect();
-void pulse(short cr, short cg, short cb);
-void rainbow(bool rotate);
-void static_color(short cr, short cg, short cb);
+void pulse();
+void rainbow();
+void static_color();
 void clock_simple();
 void clock_gradient();
 void white();
@@ -165,16 +169,18 @@ void loop() {
         Serial.printf("Request: %s\n", req.c_str());
     }
 
+    if (!is_on) return;
+
     // Set colors & update LEDs
     switch (current_effect) {
     case MODE_STATIC:
-        static_color(r, g, b);
+        static_color();
         break;
     case MODE_RAINBOW:
-        rainbow(rotate);
+        rainbow();
         break;
     case MODE_PULSE:
-        pulse(r, g, b);
+        pulse();
         break;
     case MODE_FADE:
         fade_effect();
@@ -209,7 +215,7 @@ void process_message(JSONVar msg) {
             current_effect = MODE_PULSE;
         } else if (strcmp(mode, "fade") == 0) {
             // Reset effect colors, effect always starts with red
-            eff_r = 0; eff_g = 0; eff_b = 0;
+            color_effect.r = 0; color_effect.g = 0; color_effect.b = 0;
             m = 0;
             current_effect = MODE_FADE;
         } else if (strcmp(mode, "sclock") == 0) {
@@ -238,9 +244,9 @@ void process_message(JSONVar msg) {
             hex_green[2] = '\0';
             hex_blue[2] = '\0';
             // Convert hex values into decimal
-            r = (int) strtol(hex_red, nullptr, 16);
-            g = (int) strtol(hex_green, nullptr, 16);
-            b = (int) strtol(hex_blue, nullptr, 16);
+            color_settings.r = (int) strtol(hex_red, nullptr, 16);
+            color_settings.g = (int) strtol(hex_green, nullptr, 16);
+            color_settings.b = (int) strtol(hex_blue, nullptr, 16);
         } else {
             Serial.printf("Error: No valid color format received, need hex: %s (%d)\n", color, strlen(color));
         }
@@ -294,9 +300,9 @@ void updateLeds() {
     for (int i = 0; i < LED_COUNT; i++) {
         int rb = 0, gb = 0, bb = 0;
         if (is_on) {
-            rb = eff_r*brightness;
-            gb = eff_g*brightness;
-            bb = eff_b*brightness;
+            rb = color_effect.r * brightness;
+            gb = color_effect.g * brightness;
+            bb = color_effect.b * brightness;
         }
         leds[i] = CRGB(rb, gb, bb);
     }
@@ -324,28 +330,28 @@ int getSecondsLED() {
 void fade_effect() {
     if (m > 2) m = 0;
     if (m == 0) {
-        eff_r++;
-        if (eff_b > 0) eff_b--;
-        if (eff_r >= 255) {
+        color_effect.r++;
+        if (color_effect.b > 0) color_effect.b--;
+        if (color_effect.r >= 255) {
             m++;
             // Always make sure next number can be incremented
-            eff_g = 0;
+            color_effect.g = 0;
         }
     }
     if (m == 1) {
-        eff_g++;
-        if (eff_r > 0) eff_r--;
-        if (eff_g >= 255) {
+        color_effect.g++;
+        if (color_effect.r > 0) color_effect.r--;
+        if (color_effect.g >= 255) {
             m++;
-            eff_b = 0;
+            color_effect.b = 0;
         }
     }
     if (m == 2) {
-        eff_b++;
-        if (eff_g > 0) eff_g--;
-        if (eff_b >= 255) {
+        color_effect.b++;
+        if (color_effect.g > 0) color_effect.g--;
+        if (color_effect.b >= 255) {
             m = 0;
-            eff_r = 0;
+            color_effect.r = 0;
         }
     }
 
@@ -354,8 +360,10 @@ void fade_effect() {
 }
 
 // Pulses specified color
-void pulse(short cr, short cg, short cb) {
+// void pulse(short cr, short cg, short cb) {
+void pulse() {
     if (m > 1) m = 0;
+    static Color pulse_color = color_settings;
     // LED gets brighter
     if (m == 0) {
         eff_brightness += 0.01;
@@ -371,65 +379,63 @@ void pulse(short cr, short cg, short cb) {
             m = 0;
             if (!receive_msg) delay(del*0.25);
             if (random_color) {
-                r = random(0, 256);
-                g = random(0, 256);
-                b = random(0, 256);
+                pulse_color.r = random(0, 256);
+                pulse_color.g = random(0, 256);
+                pulse_color.b = random(0, 256);
             }
         }
     }
     if (random_color) {
-        eff_r = r * eff_brightness;
-        eff_g = g * eff_brightness;
-        eff_b = b * eff_brightness;
+        color_effect.r = pulse_color.r * eff_brightness;
+        color_effect.g = pulse_color.g * eff_brightness;
+        color_effect.b = pulse_color.b * eff_brightness;
     } else {
-        eff_r = cr * eff_brightness;
-        eff_g = cg * eff_brightness;
-        eff_b = cb * eff_brightness;
+        color_effect.r = color_settings.r * eff_brightness;
+        color_effect.g = color_settings.g * eff_brightness;
+        color_effect.b = color_settings.b * eff_brightness;
     }
     updateLeds();
     if (!receive_msg) delay(del);
 }
 
 // Rainbow effect
-void rainbow(bool rot) {
+void rainbow() {
     if (!is_on) {
         updateLeds();
         return;
     }
     short factor = 255 / (LED_COUNT / 3);
     // If LED_COUNT is e.g. 120 factor will be 6, if r is set to 255 it'll never go fully down to zero (6 * 40 = 240)
-    eff_r = factor * ( LED_COUNT / 3 );
-    eff_g = 0;
-    eff_b = 0;
+    color_effect.r = factor * ( LED_COUNT / 3 );
+    color_effect.g = 0;
+    color_effect.b = 0;
     for (int i = 0; i < LED_COUNT; i++) {
         // First third
         if (i < (LED_COUNT/3)) {
-            eff_r -= factor;
-            eff_g += factor;
+            color_effect.r -= factor;
+            color_effect.g += factor;
         } else if (i < (LED_COUNT/3)*2) {
-            eff_g -= factor;
-            eff_b += factor;
+            color_effect.g -= factor;
+            color_effect.b += factor;
         } else {
-            eff_b -= factor;
-            eff_r += factor;
+            color_effect.b -= factor;
+            color_effect.r += factor;
         }
         if (i+offset < LED_COUNT)
-            leds[i+offset] = CRGB(eff_r*brightness, eff_g*brightness, eff_b*brightness);
+            leds[i+offset] = CRGB(color_effect.r * brightness, color_effect.g * brightness, color_effect.b * brightness);
         else
-            leds[i+offset-LED_COUNT] = CRGB(eff_r*brightness, eff_g*brightness, eff_b*brightness);
+            leds[i+offset-LED_COUNT] = CRGB(color_effect.r * brightness, color_effect.g * brightness, color_effect.b * brightness);
     }
-    if (rot) offset++;
+    if (rotate) offset++;
     if (offset >= LED_COUNT) offset = 0;
     FastLED.show();
     if (!receive_msg) delay(del);
 }
 
 // Shows specified color
-void static_color(short cr, short cg, short cb) {
+void static_color() {
     // FIXME: Colors are not represented properly (maybe need to switch to HSV)
-    eff_r = cr;
-    eff_g = cg;
-    eff_b = cb;
+    color_effect = color_settings;
 
     updateLeds();
 }
@@ -484,9 +490,7 @@ void clock_gradient() {
 }
 
 void white() {
-    eff_r = 255;
-    eff_g = 255;
-    eff_b = 255;
+    color_effect = Color{255, 255, 255};
 
     updateLeds();
 }

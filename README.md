@@ -5,8 +5,8 @@ The server is able to control multiple clients.
 
 ## Client
 
-The client requires a small arduino/microcontroller with a WiFi shield. 
-You'll also need an WS2812B LED strips, favorably made of 120 LEDs.
+The client is built from a small arduino/microcontroller with a WiFi shield (ESP8266 microcontroller). 
+You'll also need a WS2812B LED strip, favorably made of 120 LEDs.
 
 I'm using an ESP8266 with a builtin WiFi shield.
 The LED strip of my clock is wrapped around a 3D printed bracket, which I also use to screw the clock to the wall.
@@ -28,3 +28,33 @@ The server is setup inside a docker container.
 It's a simple NodeJS server using postgres to store some basic informations about different clocks & settings.
 
 It can be started by going into the `server/` folder and running `docker-compose up`.
+
+## API Documentation Client & Server
+
+Client & Server are communicating via a JSON API.
+
+Example request from Server to client, changing the mode to rainbow.
+
+```json
+{
+    "mode": "rainbow",
+    "on": true,
+    "brightness": 10,
+    "delay": 20,
+    "rotate": true
+}
+```
+
+Valid fields:
+
+Field | Type | Valid Values | Explanation
+--- | --- | --- | ---
+`mode` | string | static, rainbow, pulse, fade, sclock, gclock | Mode of the device
+`timestamp` | long | e.g. 1667218460 | Timestamp for time synchronization
+`brightness` | int | 0 >= x <= 100, e.g. 33, 50 | Brightness of the device (0 => leds are off)
+`on` | bool | true, false | Is the device on, if not it will just wait for incoming requests
+`color` | string | hexadecimal colors (e.g. #2c75ae) | Color of the device (limited to modes: `static`, `pulse`)
+`delay` | int | delay in milliseconds between entering program loop (can be used to slow down effects) (limited to modes: `rainbow`, `pulse`, `fade`)
+`showSeconds` | bool | true, false | Show the seconds? (limited to `sclock`)
+`randomColor` | bool | true, false | Use random colors? (limited to `pulse`)
+`rotate` | bool | true, false | Rotate effect? (limited to `rainbow`)
