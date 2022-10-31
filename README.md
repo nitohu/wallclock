@@ -53,8 +53,12 @@ Field | Type | Valid Values | Explanation
 `timestamp` | long | e.g. 1667218460 | Timestamp for time synchronization
 `brightness` | int | 0 >= x <= 100, e.g. 33, 50 | Brightness of the device (0 => leds are off)
 `on` | bool | true, false | Is the device on, if not it will just wait for incoming requests
-`color` | string | hexadecimal colors (e.g. #2c75ae) | Color of the device (limited to modes: `static`, `pulse`)
+`color` | string | hexadecimal colors (e.g. #2c75ae) | Primary color of the leds (limited to modes: `sclock`, `gclock`, `static`, `pulse`)
+`color2` | string | hexadecimal colors | Secondary color of the leds (limited to modes: `sclock`, `gclock`)
+`color3` | string | hexadecimal colors | Tertiary color of the leds (limited to modes: `sclock`, `gclock`)
+`color4` | string | hexadecimal colors | Quaternary color of the leds (limited to modes: `gclock`)
 `delay` | int | delay in milliseconds between entering program loop (can be used to slow down effects) (limited to modes: `rainbow`, `pulse`, `fade`)
 `showSeconds` | bool | true, false | Show the seconds? (limited to `sclock`)
 `randomColor` | bool | true, false | Use random colors? (limited to `pulse`)
 `rotate` | bool | true, false | Rotate effect? (limited to `rainbow`)
+`useGradient` | bool | true, false | If true use gradients, otherwise use static colors. (limited to mode: `gclock`)
