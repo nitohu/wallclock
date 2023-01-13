@@ -1,6 +1,6 @@
-const { Pool } = require("pg")
-const config = require("../config")
-const logger = require("../logger")
+import { Pool } from "pg"
+import config from "../config"
+import logger from "../logger"
 
 // Set up & connect to database, stop program if it fails
 const pool = new Pool({
@@ -17,20 +17,20 @@ pool.connect().then(() => {
     process.exit(1)
 })
 
-const query = async (text, params) => {
+const query = async (text: string, params?: any[]) => {
     const s = Date.now()
     const r = await pool.query(text, params)
     const d = Date.now() - s
     logger.info(`query "${text}" executed in ${d}ms (Records affected: ${ r.rowCount })`)
     return r
 }
-const queryOne = async (text, params) => {
+const queryOne = async (text: string, params?: any) => {
     if (!text.toLowerCase().includes("limit")) text += " LIMIT 1"
     const r = await query(text, params)
     return r.rowCount < 1 ? null : r.rows[0]
 } 
 
-module.exports = {
+export default {
     // pool,
     query,
     queryOne

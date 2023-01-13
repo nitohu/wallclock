@@ -2,9 +2,10 @@
   "name": "wanduhr-server",
   "version": "1.0.0",
   "description": "This is supposed to be deployed on a server.",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "start": "node index.js",
+    "build": "tsc --project tsconfig.json",
+    "start": "node ../build/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "nitohu",
@@ -16,5 +17,12 @@
     "express-session": "^1.17.3",
     "jsonwebtoken": "^8.5.1",
     "pg": "^8.7.3"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.2",
+    "@types/express": "^4.17.15",
+    "@types/express-session": "^1.17.5",
+    "@types/jsonwebtoken": "^9.0.1",
+    "@types/pg": "^8.6.6"
   }
 }

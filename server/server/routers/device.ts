@@ -1,19 +1,19 @@
-const express = require("express")
-const auth = require("../middleware/auth")
-const Device = require("../models/device")
-const { DeviceMode, modes } = require("../models/device_mode")
-const logger = require("../logger")
+import express, {Response} from "express"
+import auth from "../middleware/auth"
+import Device from "../models/device"
+import { modes } from "../models/device_mode"
+import logger from "../logger"
 
 const router = express.Router()
 
-router.get("/", auth, async (req, res) => {
-    let device = undefined
-    let err = undefined
+router.get("/", auth, async (req: any, res: Response): Promise<any> => {
+    let device: Device | undefined
+    let err: string = ""
     // ID is given, search for device
     if (req.query.id) {
         try {
-            device = await Device.FindByID(req.query.id)
-        } catch (e) { err = e }
+            device = await Device.FindByID(Number.parseInt(req.query.id.toString()))
+        } catch (e: any) { err = e.message }
     }
     return res.render("device_form", {
         settings: req.session.settings,
@@ -24,9 +24,9 @@ router.get("/", auth, async (req, res) => {
     })
 })
 
-router.post("/", auth, async (req, res) => {
-    let device = new Device()
-    let save = false
+router.post("/", auth, async (req: any, res: Response): Promise<any> => {
+    let device: Device = new Device("", "")
+    let save: boolean = false
     // Get device to be edited, return back to form if not found
     if (req.body.id && req.body.submit == "Save") {
         try {
@@ -44,13 +44,12 @@ router.post("/", auth, async (req, res) => {
     }
     device.name = req.body.name
     device.ip = req.body.ip
-    device.token = req.body.token
-    logger.info(`Body active: ${req.body.active}`)
+    device.setToken(req.body.token)
     device.active = req.body.active
 
     try {
-    if (save) await device.write()
-    else await device.create()
+        if (save) await device.write()
+        else await device.create()
     } catch (err) {
         return res.render("device_form", {
             settings: req.session.settings,
@@ -64,10 +63,13 @@ router.post("/", auth, async (req, res) => {
     return res.redirect("/")
 })
 
-router.get("/delete", auth, async (req, res) => {
+router.get("/delete", auth, async (req: any, res: Response): Promise<any> => {
     try {
+        if (!req.query.id)
+            throw new Error("Please specify an ID.")
+
         // TODO: Could be enhanced by writing static Delete function which executes only 1 query
-        const d = await Device.FindByID(req.query.id)
+        const d = await Device.FindByID(Number.parseInt(req.query.id.toString()))
         const r = await d.delete()
         logger.info(`Successfully deleted device "${r.name}" with ID ${r.id}`)
         
@@ -81,4 +83,4 @@ router.get("/delete", auth, async (req, res) => {
     }
 })
 
-module.exports = router
+export default router

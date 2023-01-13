@@ -1,15 +1,15 @@
-const express = require("express")
-const auth = require("../middleware/auth")
-const Device = require("../models/device")
-const logger = require("../logger")
-const { DeviceModeSettings } = require("../models/mode_settings")
+import express, {Request, Response} from "express"
+import auth from "../middleware/auth"
+import Device from "../models/device"
+import logger from "../logger"
+import { DeviceModeSettings } from "../models/mode_settings"
 
 const router = express.Router()
 
 router.use(express.json())
 
-const getDeviceByToken = async (res, token) => {
-    let device = undefined
+const getDeviceByToken = async (res: Response, token: string): Promise<Device> => {
+    let device: Device
     try {
         device = await Device.FindByToken(token)
     } catch (e) {
@@ -33,11 +33,12 @@ const getDeviceByToken = async (res, token) => {
     return device
 }
 
-router.get("/generateDeviceToken", auth, async (req, res) => {
+router.get("/generateDeviceToken", auth, async (req: Request, res: Response): Promise<any> => {
     if (!req.query.id) return res.status(400).send({error: "Please provide a device id."})
-    let device = undefined
+    let device: Device
+
     try {
-        device = await Device.FindByID(req.query.id)
+        device = await Device.FindByID(Number.parseInt(req.query.id.toString()))
     } catch(e) {
         return res.status(404).send({error: `Device with id ${req.query.id} cannot be found.`})
     }
@@ -46,14 +47,14 @@ router.get("/generateDeviceToken", auth, async (req, res) => {
 })
 
 // Can be used by clients / form to update the current configuration of device
-router.post("/updateMode", auth, async (req, res) => {    
-    let device = undefined
+router.post("/updateMode", auth, async (req: Request, res: Response): Promise<any> => {
+    let device: Device
     // Find device
     try {
         device = await Device.FindByID(req.body.id)
     } catch (e) {
         logger.info(e)
-        return res.status(404).send({error: `Device with id ${req.body.id} cannot be founbd.`})
+        return res.status(404).send({error: `Device with id ${req.body.id} cannot be found.`})
     }
     // TODO: Probably need to check if values are actually included in request body (& maybe validate them as well)
     // Save to database
@@ -81,15 +82,17 @@ router.post("/updateMode", auth, async (req, res) => {
     return res.send({success: `Mode was successfully updated to ${req.body.mode}.`})
 })
 
-router.get("/getModeSettings", auth, async (req, res) => {
-    let settings = undefined
+router.get("/getModeSettings", auth, async (req: Request, res: Response): Promise<any> => {
+    let settings: DeviceModeSettings[]
     try {
-        settings = await DeviceModeSettings.GetSettings(req.query.device_id)
+        if (!req.query.device_id)
+            throw new Error("Please specify a device_id.")
+        settings = await DeviceModeSettings.GetSettings(Number.parseInt(req.query.device_id.toString()))
     } catch (e) {
         logger.warn(e)
         return res.status(400).send({error: e})
     }
-    const data = []
+    const data: object[] = []
     for (let i = 0; i < settings.length; i++) {
         const d = {
             name: settings[i].getName(),
@@ -108,7 +111,7 @@ router.get("/getModeSettings", auth, async (req, res) => {
     res.send(data)
 })
 
-router.get("/currentTime", async (req, res) => {
+router.get("/currentTime", async (req: Request, res: Response): Promise<any> => {
     // NOTE: If timezones per clock are activated we'll need device "authentication"
     res.send({
         timestamp: Date.now(),
@@ -116,8 +119,8 @@ router.get("/currentTime", async (req, res) => {
 })
 
 // Used by the arduino to get initial configuration
-router.post("/config", async (req, res) => {
-    let device = undefined
+router.post("/config", async (req: Request, res: Response): Promise<any> => {
+    let device: Device
     logger.info(`Body: ${JSON.stringify(req.body)}`)
     try {
         device = await getDeviceByToken(res, req.body.token)
@@ -126,18 +129,18 @@ router.post("/config", async (req, res) => {
     }
 
     logger.info(`Device ${device.name} asks for configuration`)
-    let deviceSettings = undefined
+    let deviceSettings: DeviceModeSettings | undefined
     if (device.mode.isConfigurable) {
         deviceSettings = device.getCurrentModeSettings()
     }
-    const body = {
+    let body: any = {
         // Return timestamp as seconds
         timestamp: Date.now()/1000,
         mode: device.mode.name,
         brightness: device.getBrightness(),
         on: device.isOn()
     }
-    if (deviceSettings) {
+    if (deviceSettings !== undefined) {
         if (device.mode.configs.includes("color")) {
             body.color = deviceSettings.getColor()
         }
@@ -169,4 +172,4 @@ router.post("/config", async (req, res) => {
     return res.send(body)
 })
 
-module.exports = router
+export default router

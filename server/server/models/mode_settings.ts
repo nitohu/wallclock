@@ -1,77 +1,76 @@
-const db = require("../db")
-const { validModes } = require("./device_mode")
+import db from "../db"
+import { validModes } from "./device_mode"
 
 /**
  * DeviceModeSettings stores settings for specific modes for each devices in the database
  */
 class DeviceModeSettings {
-    #deviceId = 0
-    #name = ""
+    #deviceId: number
+    #name: string
     #speed = 10
-    #color = ""
-    #color2 = ""
-    #color3 = ""
-    #color4 = ""
+    #color: string
+    #color2: string
+    #color3: string
+    #color4: string
     #randomColor = false
     #showSeconds = true
     #rotate = true
     #useGradient = false
 
-    constructor(name, deviceID) {
+    constructor(name: string, deviceID: number) {
         if (!validModes.includes(name))
             throw new Error("Invalid name.")
         this.#name = name
         this.#deviceId = deviceID
+        this.#color = ""
+        this.#color2 = ""
+        this.#color3 = ""
+        this.#color4 = ""
     }
 
-    getName() { return this.#name }
-    getSpeed() {
-        return Number.parseInt(this.#speed)
+    getName(): string { return this.#name }
+    getSpeed(): number {
+        return this.#speed
     }
-    getColor() { return this.#color }
-    getColor2() { return this.#color2 }
-    getColor3() { return this.#color3 }
-    getColor4() { return this.#color4 }
-    getRandomColor() { return this.#randomColor }
-    getShowSeconds() { return this.#showSeconds }
-    getRotate() { return this.#rotate }
-    getUseGradient() { return this.#useGradient }
-    setSpeed(speed) {
-        let s = Number.parseInt(speed)
-        if (s > 50) s = 50
-        else if (s < 0) s = 0
-        this.#speed = s
+    getColor(): string { return this.#color }
+    getColor2(): string { return this.#color2 }
+    getColor3(): string { return this.#color3 }
+    getColor4(): string { return this.#color4 }
+    getRandomColor(): boolean { return this.#randomColor }
+    getShowSeconds(): boolean { return this.#showSeconds }
+    getRotate(): boolean { return this.#rotate }
+    getUseGradient(): boolean { return this.#useGradient }
+    setSpeed(speed: number) {
+        if (speed > 50) this.#speed = 50
+        else if (speed < 0) this.#speed = 0
+        else this.#speed = speed
     }
-    setColor(color) {
+    setColor(color: string) {
         // TODO: Add regex validating hex
         this.#color = color
     }
-    setColor2(color) {
+    setColor2(color: string) {
         // TODO: Add regex validating hex
         this.#color2 = color
     }
-    setColor3(color) {
+    setColor3(color: string) {
         // TODO: Add regex validating hex
         this.#color3 = color
     }
-    setColor4(color) {
+    setColor4(color: string) {
         // TODO: Add regex validating hex
         this.#color4 = color
     }
-    setRandomColor(rc) {
-        if (typeof(rc) !== "boolean") return;
+    setRandomColor(rc: boolean) {
         this.#randomColor = rc
     }
-    setShowSeconds(show) {
-        if (typeof(show) !== "boolean") return;
+    setShowSeconds(show: boolean) {
         this.#showSeconds = show
     }
-    setRotate(rotate) {
-        if (typeof(rotate) !== "boolean") return;
+    setRotate(rotate: boolean) {
         this.#rotate = rotate
     }
-    setUseGradient(ug) {
-        if (typeof(ug) !== "boolean") return;
+    setUseGradient(ug: boolean) {
         this.#useGradient = ug
     }
 
@@ -85,7 +84,7 @@ class DeviceModeSettings {
         let r = await db.query(q, [
             this.#deviceId,
             this.#name,
-            Number.parseInt(this.#speed),
+            this.#speed,
             this.#color,
             this.#color2,
             this.#color3,
@@ -98,7 +97,7 @@ class DeviceModeSettings {
         if (!r || r.rowCount === 0)
             throw new Error("Something bad happened.")
         
-        r = r.rows[0]
+        // r = r.rows[0]
     }
     // Write to database
     async write() {
@@ -109,12 +108,11 @@ class DeviceModeSettings {
         if (!validModes.includes(this.#name))
             throw new Error("Invalid name.")
         
-        console.log(`${this.#deviceId} : ${this.#name}`)
         const q = "UPDATE mode_settings SET speed=$3, color=$4, color2=$8, color3=$9, color4=$10, random_color=$5, show_seconds=$6, rotate=$7, use_gradient=$11 WHERE name=$2 AND device_id=$1"
         let r = await db.query(q, [
             this.#deviceId,
             this.#name,
-            Number.parseInt(this.#speed),
+            this.#speed,
             this.#color,
             this.#randomColor,
             this.#showSeconds,
@@ -132,7 +130,7 @@ class DeviceModeSettings {
     }
 
     // Delete from database
-    async delete() {
+    async delete(): Promise<number> {
         if (this.#deviceId <= 0)
             throw new Error("Device ID must be greater than 0.")
         const q = "DELETE FROM mode_settings WHERE device_id=$1 AND name=$2"
@@ -145,7 +143,7 @@ class DeviceModeSettings {
         return r.rows[0]
     }
 
-    static async GetSettings(device_id) {
+    static async GetSettings(device_id: number): Promise<DeviceModeSettings[]> {
         if (device_id <= 0)
             throw new Error("Device ID must be greater than 0")
         
@@ -154,7 +152,7 @@ class DeviceModeSettings {
         if (!res)
             throw new Error("Something bad happened")
         
-        const settings = []
+        let settings: DeviceModeSettings[] = []
         for (let i = 0; i < res.rowCount; i++) {
             const row = res.rows[i]
             const s = new DeviceModeSettings(row.name, row.device_id)
@@ -174,7 +172,7 @@ class DeviceModeSettings {
 
 }
 
-module.exports = {
+export {
     validModes,
     DeviceModeSettings
 }

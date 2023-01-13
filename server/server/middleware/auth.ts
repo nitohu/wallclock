@@ -1,6 +1,4 @@
-const db = require("../db")
-
-const auth = async (req, res, next) => {
+const auth = async (req: any, res: any, next: any) => {
     req.authenticated = false
     if (req.session && req.session.authenticated && req.session.settings) {
         req.authenticated = true
@@ -11,4 +9,4 @@ const auth = async (req, res, next) => {
     return res.redirect("/login")
 }
 
-module.exports = auth
+export default auth
