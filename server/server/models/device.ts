@@ -6,6 +6,21 @@ import https from "http"
 import { validModes, modes, DeviceMode } from "./device_mode"
 import { DeviceModeSettings } from "./mode_settings"
 
+type DeviceSettings = {
+    mode: string
+    color?: string
+    color2?: string
+    color3?: string
+    color4?: string
+    isOn?: boolean
+    brightness?: number
+    delay?: number
+    randomColor?: boolean
+    showSeconds?: boolean
+    rotate?: boolean
+    useGradient?: boolean
+}
+
 
 class Device {
     // Private fields
@@ -162,7 +177,6 @@ class Device {
             throw new Error("An unexpected error occured")
         if (r.rowCount == 0)
             throw new Error("No row was affected.")
-        // TODO: Delete mode settings if not cascading
         return r.rows[0]
     }
 
@@ -170,7 +184,6 @@ class Device {
      * Fetches all settings from the database linked to the device
      */
     async fetchSettings() {
-        // NOTE: Can be put in a static function in ModeSettings ().FetchSettings(device_id))
         if (this.#id <= 0)
             throw new Error("Invalid ID.")
         this.#settings = await DeviceModeSettings.GetSettings(this.#id)
@@ -207,7 +220,6 @@ class Device {
         if (token.concat() === "")
             throw new Error("Please enter a valid token.")
         
-        // NOTE: SQL Injection possible? ; depends on db.query function
         let res = await db.query("SELECT * FROM device WHERE token=$1 AND active=true", [token])
         if (!res || res.rowCount === 0)
             throw new Error(`No device with ${token} found.`)
@@ -236,17 +248,15 @@ class Device {
         return this.#token
     }
 
-    // TODO: Can probably be improved by taking a dictionary for mode settings
-    async updateMode(mode: string, color: string, color2: string, color3: string, color4: string, isOn: boolean, brightness: number, delay: number, randomColor: boolean,
-        showSeconds: boolean, rotate: boolean, useGradient: boolean) {
+    async updateMode(settings: DeviceSettings) {
         if (this.#id < 1) throw new Error("Device has no id, cannot write to database.")
-        if (!validModes.includes(mode)) throw new Error("Please provide a valid mode.")
+        if (!validModes.includes(settings.mode)) throw new Error("Please provide a valid mode.")
 
-        // FIXME: Security vuln. ; color isn't checked ; SQL Injection possible
-        this.#mode = mode
-        if (typeof(isOn) == "boolean")
-            this.#isOn = isOn
-        this.setBrightness(brightness)
+        this.#mode = settings.mode
+        if (settings.isOn !== undefined)
+            this.#isOn = settings.isOn
+        if (settings.brightness !== undefined)
+            this.setBrightness(settings.brightness)
 
         const q = "UPDATE device SET mode=$2, is_on=$3, brightness=$4 WHERE id=$1 RETURNING id"
         let r = await db.query(q, [this.#id, this.#mode, this.#isOn, this.#brightness])
@@ -257,15 +267,15 @@ class Device {
         const modeSettings = this.getCurrentModeSettings()
         if (modeSettings === undefined)
             throw new Error(`Did not find any settings for device ${this.name} with mode ${this.#mode}`)
-        modeSettings.setSpeed(delay)
-        modeSettings.setColor(color)
-        modeSettings.setColor2(color2)
-        modeSettings.setColor3(color3)
-        modeSettings.setColor4(color4)
-        modeSettings.setRandomColor(randomColor)
-        modeSettings.setShowSeconds(showSeconds)
-        modeSettings.setRotate(rotate)
-        modeSettings.setUseGradient(useGradient)
+        modeSettings.setSpeed(settings.delay)
+        modeSettings.setColor(settings.color)
+        modeSettings.setColor2(settings.color2)
+        modeSettings.setColor3(settings.color3)
+        modeSettings.setColor4(settings.color4)
+        modeSettings.setRandomColor(settings.randomColor)
+        modeSettings.setShowSeconds(settings.showSeconds)
+        modeSettings.setRotate(settings.rotate)
+        modeSettings.setUseGradient(settings.useGradient)
         await modeSettings.write()
 
         this.mode = this.getMode()
@@ -385,4 +395,7 @@ class Device {
     }
 }
 
-export default Device
+export { 
+    Device,
+    DeviceSettings
+}

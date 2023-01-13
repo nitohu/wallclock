@@ -1,7 +1,7 @@
 import express, {Response} from "express"
 import auth from "../middleware/auth"
 import Settings from "../models/settings"
-import Device from "../models/device"
+import { Device } from "../models/device"
 import logger from "../logger"
 
 const router = express.Router()

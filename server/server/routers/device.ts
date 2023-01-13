@@ -1,6 +1,6 @@
 import express, {Response} from "express"
 import auth from "../middleware/auth"
-import Device from "../models/device"
+import { Device } from "../models/device"
 import { modes } from "../models/device_mode"
 import logger from "../logger"
 

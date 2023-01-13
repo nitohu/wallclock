@@ -1,12 +1,55 @@
 import express, {Request, Response} from "express"
 import auth from "../middleware/auth"
-import Device from "../models/device"
+import { Device, DeviceSettings } from "../models/device"
 import logger from "../logger"
 import { DeviceModeSettings } from "../models/mode_settings"
 
 const router = express.Router()
 
 router.use(express.json())
+
+const buildSettings = (body: any): DeviceSettings => {
+    if (!("mode" in body)) {
+        throw new Error("'mode' must be included inside the request body.")
+    }
+    let settings: DeviceSettings = {
+        mode: body.mode
+    }
+    if ("color" in body) {
+        settings.color = body.color
+    }
+    if ("color2" in body) {
+        settings.color2 = body.color2
+    }
+    if ("color3" in body) {
+        settings.color3 = body.color3
+    }
+    if ("color4" in body) {
+        settings.color4 = body.color4
+    }
+    if ("isOn" in body) {
+        settings.isOn = body.on
+    }
+    if ("brightness" in body) {
+        settings.brightness = body.brightness
+    }
+    if ("speed" in body) {
+        settings.delay = body.speed
+    }
+    if ("randomColor" in body) {
+        settings.randomColor = body.randomColor
+    }
+    if ("showSeconds" in body) {
+        settings.showSeconds = body.showSeconds
+    }
+    if ("rotate" in body) {
+        settings.rotate = body.rotate
+    }
+    if ("useGradient" in body) {
+        settings.useGradient = body.useGradient
+    }
+    return settings
+}
 
 const getDeviceByToken = async (res: Response, token: string): Promise<Device> => {
     let device: Device
@@ -56,22 +99,10 @@ router.post("/updateMode", auth, async (req: Request, res: Response): Promise<an
         logger.info(e)
         return res.status(404).send({error: `Device with id ${req.body.id} cannot be found.`})
     }
-    // TODO: Probably need to check if values are actually included in request body (& maybe validate them as well)
     // Save to database
+    let settings = buildSettings(req.body)
     try {
-        await device.updateMode(
-            req.body.mode,
-            req.body.color,
-            req.body.color2,
-            req.body.color3,
-            req.body.color4,
-            req.body.on,
-            req.body.brightness,
-            req.body.speed,
-            req.body.randomColor,
-            req.body.showSeconds,
-            req.body.rotate,
-            req.body.useGradient)
+        await device.updateMode(settings)
     } catch (e) {
         console.log(e)
         return res.status(400).send({error: e})

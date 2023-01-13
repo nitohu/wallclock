@@ -1,6 +1,8 @@
 import db from "../db"
 import { validModes } from "./device_mode"
 
+const INVALID_HEX_CODE_ERR = "Please enter a valid hex (must be 6 characters long with a leading #)."
+
 /**
  * DeviceModeSettings stores settings for specific modes for each devices in the database
  */
@@ -28,6 +30,13 @@ class DeviceModeSettings {
         this.#color4 = ""
     }
 
+    #testColor(color: string): boolean {
+        const regex = new RegExp("^#[0-9a-fA-F]{6}$")
+        if (!regex.test(color))
+            return false
+        return true
+    }
+
     getName(): string { return this.#name }
     getSpeed(): number {
         return this.#speed
@@ -40,37 +49,50 @@ class DeviceModeSettings {
     getShowSeconds(): boolean { return this.#showSeconds }
     getRotate(): boolean { return this.#rotate }
     getUseGradient(): boolean { return this.#useGradient }
-    setSpeed(speed: number) {
+    setSpeed(speed: number | undefined) {
+        if (speed === undefined) return
         if (speed > 50) this.#speed = 50
         else if (speed < 0) this.#speed = 0
         else this.#speed = speed
     }
-    setColor(color: string) {
-        // TODO: Add regex validating hex
+    setColor(color: string | undefined) {
+        if (color === undefined) return
+        if (!this.#testColor(color))
+            throw new Error(INVALID_HEX_CODE_ERR)
         this.#color = color
     }
-    setColor2(color: string) {
-        // TODO: Add regex validating hex
+    setColor2(color: string | undefined) {
+        if (color === undefined) return
+        if (!this.#testColor(color))
+            throw new Error(INVALID_HEX_CODE_ERR)
         this.#color2 = color
     }
-    setColor3(color: string) {
-        // TODO: Add regex validating hex
+    setColor3(color: string | undefined) {
+        if (color === undefined) return
+        if (!this.#testColor(color))
+            throw new Error(INVALID_HEX_CODE_ERR)
         this.#color3 = color
     }
-    setColor4(color: string) {
-        // TODO: Add regex validating hex
+    setColor4(color: string | undefined) {
+        if (color === undefined) return
+        if (!this.#testColor(color))
+            throw new Error(INVALID_HEX_CODE_ERR)
         this.#color4 = color
     }
-    setRandomColor(rc: boolean) {
+    setRandomColor(rc: boolean | undefined) {
+        if (rc === undefined) return
         this.#randomColor = rc
     }
-    setShowSeconds(show: boolean) {
+    setShowSeconds(show: boolean | undefined) {
+        if (show === undefined) return
         this.#showSeconds = show
     }
-    setRotate(rotate: boolean) {
+    setRotate(rotate: boolean | undefined) {
+        if (rotate === undefined) return
         this.#rotate = rotate
     }
-    setUseGradient(ug: boolean) {
+    setUseGradient(ug: boolean | undefined) {
+        if (ug === undefined) return
         this.#useGradient = ug
     }
 

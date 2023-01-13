@@ -55,7 +55,5 @@ const modes: DeviceMode[] = [
 export {
     validModes,
     modes,
-    // NOTE: Can probably be removed
-    mode_config,
     DeviceMode
 }
