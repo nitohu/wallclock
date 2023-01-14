@@ -6,6 +6,7 @@ import logger from "./logger"
 import home from "./routers/home"
 import devices from "./routers/device"
 import api from "./routers/api"
+import settings from "./routers/settings"
 
 // Set up server/app
 process.env.TZ = config.timezone
@@ -32,5 +33,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use("/", home)
 app.use("/devices", devices)
 app.use("/api", api)
+app.use("/settings", settings)
 
 app.listen(8000)

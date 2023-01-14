@@ -18,6 +18,13 @@ router.get("/", auth, async (req: any, res: any): Promise<any> => {
 
 // Handle login
 router.get("/login", async (req: any, res: any): Promise<any> => {
+    const settings = await Settings.GetLatestSettings()
+    // Don't use login mask
+    if (!settings.useLoginMask) {
+        req.session.authenticated = true
+        req.session.settings = settings
+        return res.redirect("/")
+    }
     // Already logged in
     if (req.session && req.session.authenticated && req.session.settings) {
         return res.redirect("/")
