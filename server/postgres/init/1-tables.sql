@@ -23,7 +23,6 @@ CREATE TABLE device (
     create_date timestamp,
     write_date timestamp,
     mode text,
-    color text,
     is_on boolean,
     brightness real
 );
