@@ -148,7 +148,7 @@ router.get("/currentTime", async (req: Request, res: Response): Promise<any> => 
     let time_shift = 0
     if (settings.winterTime) time_shift = 60*60*1000
     res.send({
-        timestamp: (Date.now() + time_shift) / 1000,
+        timestamp: (Date.now() - time_shift) / 1000,
     })
 })
 
@@ -172,7 +172,7 @@ router.post("/config", async (req: Request, res: Response): Promise<any> => {
     }
     let body: any = {
         // Return timestamp as seconds
-        timestamp: (Date.now() + time_shift)/1000,
+        timestamp: (Date.now() - time_shift)/1000,
         mode: device.mode.name,
         brightness: device.getBrightness(),
         on: device.isOn()
