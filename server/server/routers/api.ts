@@ -3,6 +3,7 @@ import auth from "../middleware/auth"
 import { Device, DeviceSettings } from "../models/device"
 import logger from "../logger"
 import { DeviceModeSettings } from "../models/mode_settings"
+import Settings from "../models/settings"
 
 const router = express.Router()
 
@@ -143,9 +144,11 @@ router.get("/getModeSettings", auth, async (req: Request, res: Response): Promis
 })
 
 router.get("/currentTime", async (req: Request, res: Response): Promise<any> => {
-    // NOTE: If timezones per clock are activated we'll need device "authentication"
+    const settings = await Settings.GetLatestSettings()
+    let time_shift = 0
+    if (settings.winterTime) time_shift = 60*60*1000
     res.send({
-        timestamp: Date.now(),
+        timestamp: Date.now() + time_shift,
     })
 })
 

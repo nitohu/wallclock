@@ -15,8 +15,9 @@
     "ejs": "^3.1.8",
     "express": "^4.18.1",
     "express-session": "^1.17.3",
-    "jsonwebtoken": "^8.5.1",
-    "pg": "^8.7.3"
+    "jsonwebtoken": "^9.0.0",
+    "pg": "^8.7.3",
+    "timezones-list": "^3.0.1"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
