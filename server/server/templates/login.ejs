@@ -10,9 +10,9 @@
 <link href="/static/css/login.css" rel="stylesheet" />
 </head>
 
-<body>
+<body class="<% if (darkMode) { %> body-dark <% } %>">
 
-<div class="container login-container">
+<div class="container login-container <% if (darkMode) { %>login-container-dark<% } %>">
 <!-- Main Content -->
     <h1 class="center">Login</h1>
     <% if (error) { %>
@@ -23,9 +23,9 @@
     <form action="/login" method="post">
         <div class="mb-3">
             <label for="token" class="form-label">Authentication Token</label>
-            <input type="password" name="token" class="form-control" id="token" aria-describedby="tokenHelp" />
+            <input type="password" name="token" class="form-control <% if (darkMode) { %>form-input-dark<% } %>" id="token" aria-describedby="tokenHelp" />
         </div>
-        <input type="submit" class="btn btn-secondary" value="Login" />
+        <input type="submit" class="btn <% if (darkMode) { %> btn-secondary <% } else { %> btn-primary <% } %>" value="Login" />
     </form>
 </div>
 

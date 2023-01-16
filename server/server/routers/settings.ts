@@ -18,7 +18,7 @@ router.get("/", auth, async (req: any, res: Response) => {
     })
 })
 
-router.post("/", auth, async (req: Request, res: Response) => {
+router.post("/", auth, async (req: any, res: Response) => {
     const settings = await Settings.GetLatestSettings()
 
     if (!req.body.name) {
@@ -47,6 +47,7 @@ router.post("/", auth, async (req: Request, res: Response) => {
         })
     }
 
+    req.session.settings = settings
     return res.redirect("/")
 })
 

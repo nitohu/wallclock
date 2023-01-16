@@ -32,7 +32,8 @@ router.get("/login", async (req: any, res: any): Promise<any> => {
 
     return res.render("login", {
         title: "Welcome",
-        error: false
+        error: false,
+        darkMode: settings.darkMode
     })
 })
 

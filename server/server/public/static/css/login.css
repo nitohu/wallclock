@@ -2,6 +2,11 @@
     width: 50%;
     margin-top: 15%;
     padding: 3em;
-    border: 1px solid #30336b;
-    background-color: #192a56;
+    border: 1px solid #95a5a6;
+    background-color: #ecf0f1;
+}
+
+.login-container-dark {
+    border: 1px solid #30336b !important;
+    background-color: #192a56 !important;
 }

@@ -1,16 +1,16 @@
-:root {
+.body-dark {
     --bs-body-bg: #130f40;
     --bs-body-color: #dfe6e9;
     --bs-link-color: #a5b1c2;
     --bs-link-hover-color: #778ca3;
 }
 
-.form-control {
+.form-input-dark {
     background-color: #273c75 !important;
     border: 1px solid #40739e !important;
 }
 
-.form-control:focus {
+.form-input-dark:focus {
     border: 1px solid #30336b !important;
 }
 

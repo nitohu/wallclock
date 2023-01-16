@@ -11,7 +11,7 @@
 <script src="/static/js/device_form.js"></script>
 </head>
 
-<body>
+<body class="<% if (settings.darkMode) { %>body-dark<% } %>">
 
 <div class="container">
 <!-- Main Content -->
@@ -31,19 +31,19 @@
             <% if (device) { %> value="<%= device.getID() %>" <% } %> />
             <div class="mb-3 me-2 w-100">
                 <label for="name">Name</label>
-                <input type="text" name="name" class="form-control" id="name"
+                <input type="text" name="name" class="form-control <% if (settings.darkMode) { %>form-input-dark<% } %>" id="name"
                 <% if (device) { %> value="<%= device.name %>" <% } %> />
             </div>
             <div class="mb-3 ms-2 w-100">
                 <label for="ip">IP</label>
-                <input type="text" name="ip" placeholder="127.0.0.1" class="form-control" id="ip"
+                <input type="text" name="ip" placeholder="127.0.0.1" class="form-control <% if (settings.darkMode) { %>form-input-dark<% } %>" id="ip"
                 <% if (device) { %> value="<%= device.ip %>" <% } %> />
             </div>
         </div>
         <div class="mb-3">
             <label for="token">Token</label>
             <div class="input-group">
-                <input type="text" name="token" readonly class="form-control" id="token"
+                <input type="text" name="token" readonly class="form-control <% if (settings.darkMode) { %>form-input-dark<% } %>" id="token"
                 <% if (device) { %> value="<%= device.token %>" <% } %> />
                 <button class="btn btn-outline-secondary" type="button" id="generateToken">Generate</button>
             </div>
@@ -57,11 +57,11 @@
         </div>
         <br/>
         <% if (device) { %>
-            <input type="submit" class="btn btn-secondary" name="submit" value="Save" />
+            <input type="submit" class="btn <% if (settings.darkMode) { %> btn-secondary <% } else { %> btn-primary <% } %>" name="submit" value="Save" />
         <% } else { %>
-            <input type="submit" class="btn btn-secondary" name="submit" value="Create" />
+            <input type="submit" class="btn <% if (settings.darkMode) { %> btn-secondary <% } else { %> btn-primary <% } %>" name="submit" value="Create" />
         <% } %>
-        <input type="reset" class="btn btn-dark" value="Reset" />  
+        <input type="reset" class="btn <% if (settings.darkMode) { %> btn-dark <% } else { %> btn-secondary <% } %>" value="Reset" />  
     </form>
     
     <% if (device && device.mode) { %>
@@ -71,7 +71,7 @@
         <div class="d-md-flex mb-3">
             <div class="ms-2 w-100">
                 <label for="cmode">Current Mode</label>
-                <select name="cmode" id="currentModeSelector" class="form-control">
+                <select name="cmode" id="currentModeSelector" class="form-control <% if (settings.darkMode) { %>form-input-dark<% } %>">
                     <% modes.forEach((mode) => { %>
                         <option value="<%= mode.name %>"
                             <% if (device && device.mode && device.mode.name == mode.name) { %> selected <% } %>
@@ -102,26 +102,26 @@
                 <!-- TODO: Add more configurables -->
                 <div id="colorGroup"
                     <% if (device && device.mode && device.mode.configs && !device.mode.configs.includes("color")) { %> style="display: none;" <% } %> >
-                    <input type="color" name="color" id="color" class="form-control color-control"
+                    <input type="color" name="color" id="color" class="form-control <% if (settings.darkMode) { %>form-input-dark<% } %> color-control"
                         <% if (device && device.getCurrentModeSettings().getColor()) { %> value="<%= device.getCurrentModeSettings().getColor() %>" <% } %> />
                     <br />
                 </div>
                 <div id="color2Group"
                     <% if (device && device.mode && device.mode.configs && !device.mode.configs.includes("color2")) { %> style="display: none;" <% } %> 
                 >
-                    <input type="color" name="color2" id="color2" class="form-control color-control"
+                    <input type="color" name="color2" id="color2" class="form-control <% if (settings.darkMode) { %>form-input-dark<% } %> color-control"
                         <% if (device && device.getCurrentModeSettings().getColor2()) { %> value="<%= device.getCurrentModeSettings().getColor2() %>" <% } %> />
                     <br />
                 </div>
                 <div id="color3Group"
                     <% if (device && device.mode && device.mode.configs && !device.mode.configs.includes("color3")) { %> style="display: none;" <% } %>>
-                    <input type="color" name="color3" id="color3" class="form-control color-control"
+                    <input type="color" name="color3" id="color3" class="form-control <% if (settings.darkMode) { %>form-input-dark<% } %> color-control"
                         <% if (device && device.getCurrentModeSettings().getColor3()) { %> value="<%= device.getCurrentModeSettings().getColor3() %>" <% } %> />
                     <br />
                 </div>
                 <div id="color4Group"
                     <% if (device && device.mode && device.mode.configs && !device.mode.configs.includes("color4")) { %> style="display: none;" <% } %>>
-                    <input type="color" name="color4" id="color4" class="form-control color-control"
+                    <input type="color" name="color4" id="color4" class="form-control <% if (settings.darkMode) { %>form-input-dark<% } %> color-control"
                         <% if (device && device.getCurrentModeSettings().getColor4()) { %> value="<%= device.getCurrentModeSettings().getColor4() %>" <% } %> />
                     <br />
                 </div>
@@ -176,7 +176,7 @@
                 </div>
             </div>
             <br />
-            <button class="btn btn-secondary btn-sm" id="updateMode">Update Mode</button>
+            <button class="btn <% if (settings.darkMode) { %> btn-secondary <% } else { %> btn-primary <% } %> btn-sm" id="updateMode">Update Mode</button>
         </div>
     </div>
     <% } %>

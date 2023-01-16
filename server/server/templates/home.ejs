@@ -10,7 +10,7 @@
 <link href="/static/css/base.css" rel="stylesheet" />
 </head>
 
-<body>
+<body class="<% if (settings.darkMode) { %>body-dark<% } %>">
 
 <div class="container">
 <!-- Main Content -->
@@ -26,7 +26,7 @@
     </h2>
     <!-- Desktop Table View -->
     <div id="deviceTable" class="d-none d-lg-block">
-        <table class="table table-dark table-hover table-striped">
+        <table class="table <% if (settings.darkMode) { %> table-dark <% } %> table-hover table-striped">
             <thead>
                 <tr>
                     <th scope="col">#</th>
@@ -69,7 +69,7 @@
         <% if (devices.length > 0) { %>
         <% devices.forEach(device => { %>
             <div class="col">
-            <div class="card  text-bg-dark">
+            <div class="card <% if (settings.darkMode) { %> text-bg-dark <% } %>">
                 <div class="card-body">
                     <h5 class="card-title"><%= device.name %></h5>
                     <h6 class="card-subtitle mb-2 text-muted"><% if (device.getMode()) { %> <%= device.getMode().displayName %> <% } %></h6>

@@ -9,7 +9,7 @@
 <link href="/static/css/base.css" rel="stylesheet" />
 </head>
 
-<body>
+<body class="<% if (settings.darkMode) { %>body-dark<% } %>">
 
 <div class="container">
     <!-- Main Content -->
@@ -23,14 +23,14 @@
         <div class="d-md-flex">
             <div class="mb-3 me-2 w-100">
                 <label for="name">Username</label>
-                <input type="text" name="name" class="form-control" id="name" required
+                <input type="text" name="name" class="form-control <% if (settings.darkMode) { %>form-input-dark<% } %>" id="name" required
                 <% if (settings) { %> value="<%= settings.username %>" <% } %> />
             </div>
             <div class="mb-3 ms-2 w-100">
                 <label for="timezone">Timezone (not implemented yet)</label>
                 <!-- <input type="text" name="timezone" placeholder="127.0.0.1" class="form-control" id="timezone"
                 <% if (settings) { %> value="<%= settings.timezone %>" <% } %> /> -->
-                <select name="timezone" class="form-control">
+                <select name="timezone" class="form-control <% if (settings.darkMode) { %>form-input-dark<% } %>">
                 <% timezones.forEach((tz) => { %>
                     <option
                         name="<%= tz.tzCode %>"
@@ -42,7 +42,7 @@
         </div>
         <div class="mb-3">
             <label for="password">Password</label>
-            <input type="password" name="password" id="password" class="form-control" />
+            <input type="password" name="password" id="password" class="form-control <% if (settings.darkMode) { %>form-input-dark<% } %>" />
         </div>
         <div class="form-check">
             <input class="form-check-input" type="checkbox" name="useLoginMask" 
@@ -55,7 +55,7 @@
             <input class="form-check-input" type="checkbox" name="darkMode" 
             <% if (!settings || (settings && settings.darkMode)) { %> checked <% } %> />
             <label class="form-check-label" for="darkMode">
-              Dark Mode (not implemented yet)
+              Dark Mode
             </label>
         </div>
         <div class="form-check">
@@ -66,7 +66,7 @@
             </label>
         </div>
         <br />
-        <input type="submit" class="btn btn-secondary" name="submit" value="Save" />
+        <input type="submit" class="btn <% if (settings.darkMode) { %> btn-secondary <% } else { %> btn-primary <% } %>" name="submit" value="Save" />
     </form>
 </div>
 
