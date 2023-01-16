@@ -101,8 +101,6 @@ class Device {
         else this.#brightness = brightness;
     }
     setToken(token: string) {
-        if (this.#id < 1)
-            throw new Error("An ID must be set to set a token for a device.")
         // TODO: Add some kind of verification for the token before setting it
         this.#token = token
     }

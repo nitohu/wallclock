@@ -102,7 +102,7 @@ class DeviceModeSettings {
             !validModes.includes(this.#name))
             throw new Error("Device ID or name invalid.")
 
-        const q = "INSERT INTO mode_settings(device_id, name, speed, color, color2, color3, color4, random_color, show_seconds, rotate, use_gradient) VALUES ($1, $2, $3, $4, $5, $6, $7)"
+        const q = "INSERT INTO mode_settings(device_id, name, speed, color, color2, color3, color4, random_color, show_seconds, rotate, use_gradient) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)"
         let r = await db.query(q, [
             this.#deviceId,
             this.#name,
