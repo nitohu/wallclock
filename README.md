@@ -27,7 +27,9 @@ Pictures will follow.
 The server is setup inside a docker container.
 It's a simple NodeJS server using postgres to store some basic informations about different clocks & settings.
 
-It can be started by going into the `server/` folder and running `docker-compose up`.
+Before starting the server it needs to be build.
+It can be bult by going into the `server/` folder and running `docker-compose build wserver`.
+After the server is built you can run it with `docker-compose up -d`.
 
 ## API Documentation Client & Server
 

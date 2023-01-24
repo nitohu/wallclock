@@ -13,4 +13,4 @@ const config = {
     apiSecret: "supersecret2"
 }
 
-module.exports = config
+export default config

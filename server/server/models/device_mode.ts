@@ -1,4 +1,4 @@
-const validModes = [
+const validModes: string[] = [
     "gclock",
     "sclock",
     "rainbow",
@@ -8,7 +8,7 @@ const validModes = [
     "white"
 ]
 
-const mode_config = [
+const mode_config: string[] = [
     "color",
     "color2",
     "color3",
@@ -25,15 +25,16 @@ const mode_config = [
  */
 class DeviceMode {
     // Fields
-    name = ""
-    displayName = ""
-    isConfigurable = false
-    configs = []
+    name: string
+    displayName: string
+    isConfigurable: boolean
+    configs: string[]
 
-    constructor(name, displayName, isConfigurable, configs) {
+    constructor(name: string, displayName: string, isConfigurable: boolean, configs: string[]) {
         this.name = name
         this.displayName = displayName
         this.isConfigurable = isConfigurable
+        this.configs = []
         if (!this.isConfigurable) return;
         // only add valid configurations
         for (let i = 0; i < configs.length; i++) {
@@ -42,7 +43,7 @@ class DeviceMode {
     }
 }
 
-const modes = [
+const modes: DeviceMode[] = [
     new DeviceMode("sclock", "Simple Clock", true, ["showSeconds", "color", "color2", "color3"]),
     new DeviceMode("gclock", "Gradient Clock", true, ["color", "color2", "color3", "color4", "useGradient"]),
     new DeviceMode("rainbow", "Color Rainbow", true, ["speed", "rotate"]),
@@ -51,10 +52,8 @@ const modes = [
     new DeviceMode("fade", "Fade", true, ["speed"])
 ]
 
-module.exports = {
+export {
     validModes,
     modes,
-    // TODO: Can probably be removed
-    mode_config,
     DeviceMode
 }

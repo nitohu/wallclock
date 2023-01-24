@@ -5,7 +5,10 @@ CREATE TABLE settings (
     create_date timestamp,
     name text,
     passwd text,
-    timezone text
+    timezone text,
+    use_login_mask boolean,
+    dark_mode boolean,
+    summer_time boolean
 );
 
 CREATE TABLE device (
@@ -20,7 +23,6 @@ CREATE TABLE device (
     create_date timestamp,
     write_date timestamp,
     mode text,
-    color text,
     is_on boolean,
     brightness real
 );
