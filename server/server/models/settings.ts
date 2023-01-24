@@ -63,7 +63,7 @@ class Settings {
         if (this.username === "") throw new Error("Username is a required field for settings.")
 
         this.#createDate = new Date()
-        const q = "INSERT INTO settings(create_date, name, passwd, use_login_mask, dark_mode, summer_time) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id"
+        const q = "INSERT INTO settings(create_date, name, passwd, use_login_mask, dark_mode, summer_time) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id"
         let r = await db.query(q, [this.#createDate, this.username, this.#passwd, this.useLoginMask, this.darkMode, this.summerTime])
         if (!r || r.rowCount === 0) throw new Error("Something bad happened while trying to save the settings.")
 
