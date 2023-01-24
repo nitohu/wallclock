@@ -146,9 +146,9 @@ router.get("/getModeSettings", auth, async (req: Request, res: Response): Promis
 router.get("/currentTime", async (req: Request, res: Response): Promise<any> => {
     const settings = await Settings.GetLatestSettings()
     let time_shift = 0
-    if (settings.winterTime) time_shift = 60*60*1000
+    if (settings.summerTime) time_shift = 60*60*1000
     res.send({
-        timestamp: (Date.now() - time_shift) / 1000,
+        timestamp: (Date.now() + time_shift) / 1000,
     })
 })
 
@@ -164,7 +164,7 @@ router.post("/config", async (req: Request, res: Response): Promise<any> => {
 
     const settings = await Settings.GetLatestSettings()
     let time_shift = 0
-    if (settings.winterTime) time_shift = 60*60*1000
+    if (settings.summerTime) time_shift = 60*60*1000
     logger.info(`Device ${device.name} asks for configuration`)
     let deviceSettings: DeviceModeSettings | undefined
     if (device.mode.isConfigurable) {
@@ -172,7 +172,7 @@ router.post("/config", async (req: Request, res: Response): Promise<any> => {
     }
     let body: any = {
         // Return timestamp as seconds
-        timestamp: (Date.now() - time_shift)/1000,
+        timestamp: (Date.now() + time_shift)/1000,
         mode: device.mode.name,
         brightness: device.getBrightness(),
         on: device.isOn()

@@ -8,7 +8,7 @@ CREATE TABLE settings (
     timezone text,
     use_login_mask boolean,
     dark_mode boolean,
-    winter_time boolean
+    summer_time boolean
 );
 
 CREATE TABLE device (

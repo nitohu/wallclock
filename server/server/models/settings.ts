@@ -12,7 +12,7 @@ class Settings {
     timezone: string
     useLoginMask: boolean
     darkMode: boolean
-    winterTime: boolean
+    summerTime: boolean
 
     constructor() {
         this.#id = 0
@@ -22,7 +22,7 @@ class Settings {
         this.#passwd = ""
         this.useLoginMask = true
         this.darkMode = true
-        this.winterTime = false
+        this.summerTime = false
     }
     // Methods
     async authenticate(passwd: string) {
@@ -39,7 +39,7 @@ class Settings {
         this.timezone = r.timezone
         this.useLoginMask = r.use_login_mask
         this.darkMode = r.dark_mode
-        this.winterTime = r.winter_time
+        this.summerTime = r.summer_time
 
         this.#authenticated = true
     }
@@ -54,7 +54,7 @@ class Settings {
         this.timezone = r.timezone
         this.useLoginMask = r.use_login_mask
         this.darkMode = r.dark_mode
-        this.winterTime = r.winter_time
+        this.summerTime = r.summer_time
         this.#passwd = r.passwd
     }
 
@@ -63,8 +63,8 @@ class Settings {
         if (this.timezone === "") this.timezone = "de_DE"
 
         this.#createDate = new Date()
-        const q = "INSERT INTO settings(create_date, name, passwd, timezone, use_login_mask, dark_mode, winter_time) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id"
-        let r = await db.query(q, [this.#createDate, this.username, this.#passwd, this.timezone, this.useLoginMask, this.darkMode, this.winterTime])
+        const q = "INSERT INTO settings(create_date, name, passwd, timezone, use_login_mask, dark_mode, summer_time) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id"
+        let r = await db.query(q, [this.#createDate, this.username, this.#passwd, this.timezone, this.useLoginMask, this.darkMode, this.summerTime])
         if (!r || r.rowCount === 0) throw new Error("Something bad happened while trying to save the settings.")
 
         this.#id = r.rows[0].id

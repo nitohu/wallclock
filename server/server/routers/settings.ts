@@ -34,7 +34,7 @@ router.post("/", auth, async (req: any, res: Response) => {
         settings.timezone = req.body.timezone
         settings.darkMode = req.body.darkMode
         settings.useLoginMask = req.body.useLoginMask
-        settings.winterTime = req.body.winterTime
+        settings.summerTime = req.body.summerTime
         if (req.body.password) await settings.setPassword(req.body.password)
 
         await settings.save()
