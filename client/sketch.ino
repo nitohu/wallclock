@@ -342,8 +342,7 @@ void updateLeds() {
 }
 
 int getHoursLED() {
-    // TODO: Remove addition when timezone can be set server side
-    int ch = (hourFormat12() + 2) % 12;
+    int ch = hourFormat12() % 12;
     return (LED_COUNT / 12) * ch + ((float)LED_COUNT / 12 / 60) * minute();
 }
 
