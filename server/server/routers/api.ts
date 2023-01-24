@@ -109,7 +109,7 @@ router.post("/updateMode", auth, async (req: Request, res: Response): Promise<an
         return res.status(400).send({error: e})
     }
     // Update actual device
-    device.push()
+    await device.push()
 
     return res.send({success: `Mode was successfully updated to ${req.body.mode}.`})
 })
@@ -145,10 +145,8 @@ router.get("/getModeSettings", auth, async (req: Request, res: Response): Promis
 
 router.get("/currentTime", async (req: Request, res: Response): Promise<any> => {
     const settings = await Settings.GetLatestSettings()
-    let time_shift = 0
-    if (settings.summerTime) time_shift = 60*60*1000
     res.send({
-        timestamp: (Date.now() + time_shift) / 1000,
+        timestamp: settings.getCurrentTime(),
     })
 })
 
@@ -162,20 +160,18 @@ router.post("/config", async (req: Request, res: Response): Promise<any> => {
         return;
     }
 
-    const settings = await Settings.GetLatestSettings()
-    let time_shift = 0
-    if (settings.summerTime) time_shift = 60*60*1000
     logger.info(`Device ${device.name} asks for configuration`)
-    let deviceSettings: DeviceModeSettings | undefined
-    if (device.mode.isConfigurable) {
-        deviceSettings = device.getCurrentModeSettings()
-    }
+    const settings = await Settings.GetLatestSettings()
     let body: any = {
         // Return timestamp as seconds
-        timestamp: (Date.now() + time_shift)/1000,
+        timestamp: settings.getCurrentTime(),
         mode: device.mode.name,
         brightness: device.getBrightness(),
         on: device.isOn()
+    }
+    let deviceSettings: DeviceModeSettings | undefined
+    if (device.mode.isConfigurable) {
+        deviceSettings = device.getCurrentModeSettings()
     }
     if (deviceSettings !== undefined) {
         if (device.mode.configs.includes("color")) {

@@ -5,6 +5,7 @@ import logger from "../logger"
 import https from "http"
 import { validModes, modes, DeviceMode } from "./device_mode"
 import { DeviceModeSettings } from "./mode_settings"
+import Settings from "./settings";
 
 type DeviceSettings = {
     mode: string
@@ -279,7 +280,7 @@ class Device {
         this.mode = this.getMode()
     }
 
-    push() {
+    async push() {
         // Validate ip
         if (!this.ip.match(/^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}/)) {
             return;
@@ -291,6 +292,10 @@ class Device {
             // Ugly bug workaround, because js will convert it to string anyways which will cause problems for the clock
             brightness: Number.parseInt(this.#brightness.toString())
             // timestamp: Date.now()
+        }
+        if (this.mode !== undefined && this.mode.name.includes("clock")) {
+            let settings = await Settings.GetLatestSettings()
+            data.timestamp = settings.getCurrentTime()
         }
         if (this.mode !== undefined && this.mode.isConfigurable) {
             const modeSettings = this.getCurrentModeSettings()

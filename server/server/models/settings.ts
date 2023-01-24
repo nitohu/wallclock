@@ -84,6 +84,11 @@ class Settings {
     isAuthenticated(): boolean { return this.#authenticated }
     getID(): number { return this.#id }
     getCreateDate(): Date | undefined { return this.#createDate }
+    getCurrentTime(): number {
+        let time_shift = 0
+        if (this.summerTime) time_shift = 60*60*1000
+        return (Date.now() + time_shift) / 1000
+    }
 
     async setPassword(passwd: string) {
         if (passwd.length < 5) throw new Error("Password must be at least 5 characters long.")
