@@ -508,7 +508,7 @@ void clock_simple() {
             g /= j;
             b /= j;
         }
-        leds[i] = CRGB(r, g, b);
+        leds[i] = CRGB(r * brightness, g * brightness, b * brightness);
     }
     FastLED.show();
 }
