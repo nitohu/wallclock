@@ -27,10 +27,9 @@
                 <% if (settings) { %> value="<%= settings.username %>" <% } %> />
             </div>
             <div class="mb-3 ms-2 w-100">
-                <label for="timezone">Timezone (not implemented yet)</label>
-                <!-- <input type="text" name="timezone" placeholder="127.0.0.1" class="form-control" id="timezone"
-                <% if (settings) { %> value="<%= settings.timezone %>" <% } %> /> -->
-                <select name="timezone" class="form-control <% if (settings.darkMode) { %>form-input-dark<% } %>">
+                <label for="timezone">Timezone (currently configured via config.ts & rebuilding)</label>
+                <!-- TODO: Could be changed to text field -->
+                <select name="timezone" class="form-control <% if (settings.darkMode) { %>form-input-dark<% } %>" disabled>
                 <% timezones.forEach((tz) => { %>
                     <option
                         value="<%= tz.tzCode %>"

@@ -1,5 +1,6 @@
-import db from "../db"
 import bcrypt from "bcryptjs"
+import config from "../config"
+import db from "../db"
 
 class Settings {
     // Private
@@ -18,7 +19,7 @@ class Settings {
         this.#id = 0
         this.#authenticated = false
         this.username = ""
-        this.timezone = ""
+        this.timezone = config.timezone
         this.#passwd = ""
         this.useLoginMask = true
         this.darkMode = true
@@ -36,7 +37,7 @@ class Settings {
         this.#id = r.id
         this.#createDate = r.create_date
         this.username = r.name
-        this.timezone = r.timezone
+        // this.timezone = r.timezone
         this.useLoginMask = r.use_login_mask
         this.darkMode = r.dark_mode
         this.summerTime = r.summer_time
@@ -51,7 +52,7 @@ class Settings {
         this.#id = r.id
         this.#createDate = r.create_date
         this.username = r.name
-        this.timezone = r.timezone
+        // this.timezone = r.timezone
         this.useLoginMask = r.use_login_mask
         this.darkMode = r.dark_mode
         this.summerTime = r.summer_time
@@ -60,11 +61,10 @@ class Settings {
 
     async save() {
         if (this.username === "") throw new Error("Username is a required field for settings.")
-        if (this.timezone === "") this.timezone = "de_DE"
 
         this.#createDate = new Date()
-        const q = "INSERT INTO settings(create_date, name, passwd, timezone, use_login_mask, dark_mode, summer_time) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id"
-        let r = await db.query(q, [this.#createDate, this.username, this.#passwd, this.timezone, this.useLoginMask, this.darkMode, this.summerTime])
+        const q = "INSERT INTO settings(create_date, name, passwd, use_login_mask, dark_mode, summer_time) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id"
+        let r = await db.query(q, [this.#createDate, this.username, this.#passwd, this.useLoginMask, this.darkMode, this.summerTime])
         if (!r || r.rowCount === 0) throw new Error("Something bad happened while trying to save the settings.")
 
         this.#id = r.rows[0].id

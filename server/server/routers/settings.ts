@@ -31,7 +31,7 @@ router.post("/", auth, async (req: any, res: Response) => {
 
     try {
         settings.username = req.body.name
-        settings.timezone = req.body.timezone
+        // settings.timezone = req.body.timezone
         settings.darkMode = req.body.darkMode
         settings.useLoginMask = req.body.useLoginMask
         settings.summerTime = req.body.summerTime
