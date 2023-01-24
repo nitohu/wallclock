@@ -45,21 +45,21 @@
             <input type="password" name="password" id="password" class="form-control <% if (settings.darkMode) { %>form-input-dark<% } %>" />
         </div>
         <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="useLoginMask" 
+            <input class="form-check-input" type="checkbox" id="useLoginMask" name="useLoginMask" 
             <% if (!settings || (settings && settings.useLoginMask)) { %> checked <% } %> />
             <label class="form-check-label" for="useLoginMask">
               Use Master Password
             </label>
         </div>
         <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="darkMode" 
+            <input class="form-check-input" type="checkbox" id="darkMode" name="darkMode" 
             <% if (!settings || (settings && settings.darkMode)) { %> checked <% } %> />
             <label class="form-check-label" for="darkMode">
               Dark Mode
             </label>
         </div>
         <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="summerTime" 
+            <input class="form-check-input" type="checkbox" id="summerTime" name="summerTime" 
             <% if (!settings || (settings && settings.summerTime)) { %> checked <% } %> />
             <label class="form-check-label" for="summerTime">
               Summer Time <span class="text-muted">(+1 hour)</span>
